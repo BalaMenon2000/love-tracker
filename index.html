@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff6b81">
+<script type="module" src="firebase.js"></script>
+<title>Long Distance Relationship Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --rose: #ff5a76;
+  --rose-light: #ff7a95;
+  --rose-pale: #ffeef2;
+  --rose-hover: #ffd9e0;
+  --green: #4CAF50;
+  --text: #3a2030;
+  --text-muted: #9a7080;
+  --white: #ffffff;
+  --shadow: 0 4px 20px rgba(255,90,118,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--rose-pale);
+  background-image: radial-gradient(ellipse at 20% 20%, #ffe0e8 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 80%, #ffd6e7 0%, transparent 50%);
+  min-height: 100vh;
+  color: var(--text);
+  padding: 30px 20px 60px;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--rose);
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  max-width: 680px;
+  margin: 0 auto 20px;
+}
+
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.user-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--rose-light);
+  color: white;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(255,90,118,0.2);
+}
+
+button:hover {
+  background: var(--rose);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(255,90,118,0.3);
+}
+
+button:active { transform: translateY(0); }
+
+button.selected {
+  background: var(--green) !important;
+  box-shadow: 0 2px 8px rgba(76,175,80,0.3);
+}
+
+.inputs-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+input {
+  padding: 10px 14px;
+  border: 1.5px solid #f0d0d8;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: #fff8f9;
+  outline: none;
+  transition: border-color 0.2s;
+  flex: 1;
+  min-width: 130px;
+}
+
+input:focus { border-color: var(--rose-light); }
+
+.enter-btn {
+  background: linear-gradient(135deg, var(--rose-light), var(--rose));
+  padding: 10px 28px;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(255,90,118,0.3);
+}
+
+#scoreDisplay {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--rose);
+  text-align: center;
+  min-height: 36px;
+}
+
+#monthTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+#calendarHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  max-width: 640px;
+  margin: 0 auto 6px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.day {
+  background: #fff8f9;
+  border: 1.5px solid #f5e0e5;
+  border-radius: 10px;
+  min-height: 74px;
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.day:hover {
+  background: var(--rose-hover);
+  border-color: var(--rose-light);
+  transform: scale(1.03);
+}
+
+.day.selected {
+  border-color: var(--rose);
+  background: #ffe0e8;
+}
+
+.dayNumber {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.activityDot {
+  width: 7px;
+  height: 7px;
+  background: var(--rose);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 6px;
+  left: 7px;
+}
+
+.checkMark {
+  position: absolute;
+  bottom: 5px;
+  right: 7px;
+  font-size: 13px;
+}
+
+.activity-name {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.2;
+  overflow: hidden;
+  max-height: 30px;
+  word-break: break-word;
+}
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-row input {
+  flex: 2;
+  min-width: 180px;
+}
+
+.checkin-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#attendBtn { background: linear-gradient(135deg, #4caf50, #388e3c); }
+#attendBtn:hover { background: linear-gradient(135deg, #43a047, #2e7d32); }
+#missBtn { background: linear-gradient(135deg, #ff7043, #e64a19); }
+#missBtn:hover { background: linear-gradient(135deg, #f4511e, #bf360c); }
+
+#rewardBox {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--rose);
+  text-align: center;
+  min-height: 30px;
+  padding: 8px;
+  border-radius: 10px;
+  transition: all 0.4s;
+}
+
+#rewardBox.active {
+  background: linear-gradient(135deg, #fff0f3, #ffe0ea);
+  border: 1.5px solid #ffb3c4;
+  animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.95); opacity: 0.6; }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #f0d0d8, transparent);
+  margin: 4px 0 16px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💌 Long Distance Tracker</h1>
+  <p class="subtitle">Stay close, no matter the distance</p>
+</header>
+
+<!-- Setup Card -->
+<div class="card" id="setupCard">
+  <div class="section-label">Step 1 — Who are you?</div>
+  <div class="user-buttons">
+    <button id="btnA" onclick="setUser('A')">Person A</button>
+    <button id="btnB" onclick="setUser('B')">Person B</button>
+  </div>
+
+  <div id="nameStep" style="display:none;">
+    <div class="section-label" style="margin-top:16px;">Step 2 — Your name</div>
+    <div class="inputs-row">
+      <input id="myName" placeholder="Enter your name">
+    </div>
+    <div class="section-label" style="margin-top:10px;">Step 3 — Couple code</div>
+    <div class="inputs-row">
+      <input id="coupleCode" placeholder="Shared couple code">
+    </div>
+    <div style="text-align:center; margin-top:6px;">
+      <button class="enter-btn" onclick="enterApp()">Enter ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden inputs needed for score display later -->
+<input id="nameA" type="hidden">
+<input id="nameB" type="hidden">
+
+<!-- Score Card -->
+<div class="card" id="mainCard" style="display:none;">
+  <h2 id="scoreDisplay"></h2>
+  <div class="divider"></div>
+
+  <h3 id="monthTitle"></h3>
+
+  <div id="calendarHeader">
+    <div>Sun</div><div>Mon</div><div>Tue</div>
+    <div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+  </div>
+  <div id="calendar"></div>
+
+  <div class="divider" style="margin-top:18px;"></div>
+
+  <!-- Activity -->
+  <div class="section-label" style="margin-top:4px;">Add Activity to Selected Day</div>
+  <div class="action-row">
+    <input id="activityInput" placeholder="Activity name...">
+    <button onclick="addActivity()">Add</button>
+    <button onclick="generateActivity()">💡 Idea</button>
+  </div>
+
+  <div class="divider" style="margin-top:16px;"></div>
+
+  <!-- Check-in -->
+  <div class="section-label">Log Today</div>
+  <div class="checkin-row">
+    <button id="attendBtn" onclick="checkIn(true)">✔ I Attended</button>
+    <button id="missBtn" onclick="checkIn(false)">✖ I Missed</button>
+  </div>
+
+  <div style="margin-top:14px;">
+    <div id="rewardBox"></div>
+  </div>
+
+</div>
+
+<script>
+
+let user = ""
+let couple = ""
+let selectedDate = null
+let selectedDayEl = null
+
+let scoreA = 0
+let scoreB = 0
+let activities = {}
+
+const activityIdeas = [
+  "Watch a movie together",
+  "Cook the same meal",
+  "Online game night",
+  "Deep conversation night",
+  "Future travel planning",
+  "Relationship quiz",
+  "Workout together",
+  "Virtual coffee date",
+  "Send voice notes",
+  "Photo sharing night"
+]
+
+const rewards = [
+  "Plan a surprise date 🌹",
+  "Send a handwritten letter 💌",
+  "Order food for your partner 🍕",
+  "Make a love playlist 🎵",
+  "Write 5 things you love about them ❤️"
+]
+
+const challenges = [
+  "Write a heartfelt love paragraph 📝",
+  "Plan the next date night 🌙",
+  "Send a surprise gift 🎁",
+  "Record a heartfelt voice note 🎙️",
+  "Share your favourite memory together 🌟"
+]
+
+/* ---------- storage ---------- */
+
+function saveLocal() {
+  localStorage.setItem("rdTracker_" + couple, JSON.stringify({
+    scoreA, scoreB, activities,
+    nameA: document.getElementById("nameA").value,
+    nameB: document.getElementById("nameB").value
+  }))
+}
+
+function loadLocal() {
+  let data = localStorage.getItem("rdTracker_" + couple)
+  if (data) {
+    let p = JSON.parse(data)
+    scoreA = p.scoreA || 0
+    scoreB = p.scoreB || 0
+    activities = p.activities || {}
+    // Only load the OTHER person's name (we already have our own)
+    if (user === "A" && p.nameB) document.getElementById("nameB").value = p.nameB
+    if (user === "B" && p.nameA) document.getElementById("nameA").value = p.nameA
+  }
+}
+
+/* ---------- Firebase (optional - wire up firebase.js to enable) ---------- */
+
+async function saveFirebase() {
+  if (!window.db) return
+  await setDoc(doc(db, "couples", couple), { scoreA, scoreB, activities })
+}
+
+function listenFirebase() {
+  if (!window.db) return
+  onSnapshot(doc(db, "couples", couple), (snap) => {
+    let data = snap.data()
+    if (!data) return
+    scoreA = data.scoreA
+    scoreB = data.scoreB
+    activities = data.activities
+    updateScoreDisplay()
+    loadCalendar()
+  })
+}
+
+/* ---------- core ---------- */
+
+function setUser(u) {
+  user = u
+  document.getElementById("btnA").classList.remove("selected")
+  document.getElementById("btnB").classList.remove("selected")
+  document.getElementById("btn" + u).classList.add("selected")
+  document.getElementById("nameStep").style.display = "block"
+  document.getElementById("myName").placeholder = "Enter your name (" + (u === "A" ? "Person A" : "Person B") + ")"
+  document.getElementById("myName").focus()
+  //localStorage.setItem("rdTracker_user", u)
+}
+
+function enterApp() {
+  let session = { nameA: document.getElementById("nameA").value, nameB: document.getElementById("nameB").value, coupleCode: document.getElementById("coupleCode").value, user }
+  localStorage.setItem("rdTracker_lastSession", JSON.stringify(session))
+  if (!user) { alert("Please select Person A or B first"); return }
+  let myName = document.getElementById("myName").value.trim()
+  if (!myName) { alert("Please enter your name"); return }
+  couple = document.getElementById("coupleCode").value.trim() || "default"
+
+  // Save this person's name into the correct hidden input
+  document.getElementById("name" + user).value = myName
+
+  loadLocal()
+
+  // After loading, make sure our name is still set (loadLocal might overwrite)
+  document.getElementById("name" + user).value = myName
+
+  document.getElementById("setupCard").style.display = "none"
+  document.getElementById("mainCard").style.display = "block"
+  updateScoreDisplay()
+  loadCalendar()
+  listenFirebase()
+}
+
+function updateScoreDisplay() {
+  let nameA = document.getElementById("nameA").value || "A"
+  let nameB = document.getElementById("nameB").value || "B"
+  document.getElementById("scoreDisplay").innerText =
+    nameA + ": " + scoreA + "  |  " + nameB + ": " + scoreB
+}
+
+function loadCalendar() {
+  let calendar = document.getElementById("calendar")
+  calendar.innerHTML = ""
+  selectedDate = null
+  selectedDayEl = null
+
+  let date = new Date()
+  let year = date.getFullYear()
+  let month = date.getMonth()
+  let firstDay = new Date(year, month, 1).getDay()
+  let daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  document.getElementById("monthTitle").innerText =
+    date.toLocaleString("default", { month: "long" }) + " " + year
+
+  for (let i = 0; i < firstDay; i++) {
+    calendar.appendChild(document.createElement("div"))
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    let div = document.createElement("div")
+    div.className = "day"
+    div.innerHTML = `<div class="dayNumber">${day}</div>`
+
+    let act = activities[day]
+    if (act) {
+      let dot = document.createElement("div")
+      dot.className = "activityDot"
+      div.appendChild(dot)
+      let label = document.createElement("div")
+      label.className = "activity-name"
+      label.innerText = act.name || act
+      div.appendChild(label)
+      if (act.checkA !== undefined) {
+        let mark = document.createElement("div")
+        mark.className = "checkMark"
+        mark.innerText = (user === "A") ? (act.checkA ? "✔" : "✖") : (act.checkB ? "✔" : "✖")
+        div.appendChild(mark)
+      }
+    }
+
+    div.onclick = () => selectDate(day, div)
+    calendar.appendChild(div)
+  }
+}
+
+function selectDate(day, el) {
+  selectedDate = day
+  if (selectedDayEl) selectedDayEl.classList.remove("selected")
+  selectedDayEl = el
+  el.classList.add("selected")
+}
+
+function addActivity() {
+  if (!selectedDate) { alert("Select a date first"); return }
+  let name = document.getElementById("activityInput").value.trim()
+  if (!name) { alert("Enter an activity name"); return }
+  if (!activities[selectedDate]) activities[selectedDate] = {}
+  if (typeof activities[selectedDate] === "string") {
+    activities[selectedDate] = { name: activities[selectedDate] }
+  }
+  activities[selectedDate].name = name
+  saveLocal()
+  saveFirebase()
+  loadCalendar()
+  // reselect
+  let days = document.querySelectorAll(".day")
+  days.forEach(d => {
+    if (d.querySelector(".dayNumber") && parseInt(d.querySelector(".dayNumber").innerText) === selectedDate) {
+      selectedDayEl = d
+      d.classList.add("selected")
+    }
+  })
+}
+
+function generateActivity() {
+  let idea = activityIdeas[Math.floor(Math.random() * activityIdeas.length)]
+  document.getElementById("activityInput").value = idea
+}
+
+function checkIn(attended) {
+  if (!user) { alert("Select Person A or B first"); return }
+  if (!selectedDate) { alert("Select a date on the calendar first"); return }
+
+  document.getElementById("attendBtn").classList.remove("selected")
+  document.getElementById("missBtn").classList.remove("selected")
+  if (attended) {
+    document.getElementById("attendBtn").classList.add("selected")
+  } else {
+    document.getElementById("missBtn").classList.add("selected")
+  }
+
+  // Ensure the day entry exists as an object
+  if (!activities[selectedDate] || typeof activities[selectedDate] === "string") {
+    activities[selectedDate] = { name: activities[selectedDate] || "" }
+  }
+
+  // Store the previous check value for this day so we can undo its effect
+  let prevCheck = user === "A" ? activities[selectedDate].checkA : activities[selectedDate].checkB
+  let hadPreviousCheck = prevCheck !== undefined
+
+  // Update the check value for this day
+  if (user === "A") activities[selectedDate].checkA = attended
+  else activities[selectedDate].checkB = attended
+
+  // Adjust score: undo previous check, apply new one
+  // This means changing your answer on a day costs/gains the difference, not a full new point
+  if (user === "A") {
+    if (hadPreviousCheck) {
+      // Remove old effect, apply new
+      scoreA -= prevCheck ? 1 : -1
+    }
+    scoreA += attended ? 1 : -1
+  } else {
+    if (hadPreviousCheck) {
+      scoreB -= prevCheck ? 1 : -1
+    }
+    scoreB += attended ? 1 : -1
+  }
+
+  saveLocal()
+  saveFirebase()
+  loadCalendar()
+  updateScoreDisplay()
+  checkRewards()
+
+  // Reselect the date so it stays highlighted
+  document.querySelectorAll(".day").forEach(d => {
+    if (d.querySelector(".dayNumber") && parseInt(d.querySelector(".dayNumber").innerText) === selectedDate) {
+      selectedDayEl = d
+      d.classList.add("selected")
+    }
+  })
+}
+
+function checkRewards() {
+  let box = document.getElementById("rewardBox")
+  let msg = ""
+
+  if (scoreA >= 10) {
+    let r = rewards[Math.floor(Math.random() * rewards.length)]
+    let nameA = document.getElementById("nameA").value || "A"
+    msg = "🎉 " + nameA + " earned a reward: " + r
+    scoreA = 0
+  } else if (scoreB >= 10) {
+    let r = rewards[Math.floor(Math.random() * rewards.length)]
+    let nameB = document.getElementById("nameB").value || "B"
+    msg = "🎉 " + nameB + " earned a reward: " + r
+    scoreB = 0
+  } else if (scoreA <= -5) {
+    let c = challenges[Math.floor(Math.random() * challenges.length)]
+    let nameA = document.getElementById("nameA").value || "A"
+    msg = "💪 Challenge for " + nameA + ": " + c
+    scoreA = 0
+  } else if (scoreB <= -5) {
+    let c = challenges[Math.floor(Math.random() * challenges.length)]
+    let nameB = document.getElementById("nameB").value || "B"
+    msg = "💪 Challenge for " + nameB + ": " + c
+    scoreB = 0
+  }
+
+  if (msg) {
+    box.innerText = msg
+    box.classList.add("active")
+    saveLocal()
+    updateScoreDisplay()
+  } else {
+    box.classList.remove("active")
+  }
+}
+window.addEventListener("load", () => {
+  let saved = localStorage.getItem("rdTracker_lastSession")
+  if (saved) {
+    let s = JSON.parse(saved)
+    if (s.nameA) document.getElementById("nameA").value = s.nameA
+    if (s.nameB) document.getElementById("nameB").value = s.nameB
+    if (s.coupleCode) document.getElementById("coupleCode").value = s.coupleCode
+    if (s.user) setUser(s.user)
+  }
+})
+
+// Register service worker for PWA / offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+  })
+}
+
+</script>
+</body>
+</html>
