@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ff6b81">
+<script type="module" src="firebase.js"></script>
+<title>Workout — LDR Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --rose: #e8526a;
+  --rose-light: #f07080;
+  --rose-pale: #fdf2f4;
+  --rose-hover: #fde0e5;
+  --rose-mid: #f5c0ca;
+  --green: #4a9e6f;
+  --green-pale: #edfaf3;
+  --green-mid: #b0d9c0;
+  --red: #e05050;
+  --red-pale: #fdf0f0;
+  --amber: #e0943c;
+  --amber-pale: #fdf5ec;
+  --text: #2e1820;
+  --text-muted: #a0788a;
+  --shadow: 0 6px 28px rgba(232,82,106,0.10);
+  --shadow-lg: 0 12px 48px rgba(232,82,106,0.15);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--rose-pale);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 5% 20%, rgba(180,230,200,0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 90% 85%, rgba(255,160,185,0.2) 0%, transparent 60%);
+  min-height: 100vh;
+  color: var(--text);
+  padding: 28px 16px 80px;
+}
+
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--rose);
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin-top: 4px;
+  margin-bottom: 28px;
+}
+
+header { text-align: center; margin-bottom: 24px; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid var(--rose-mid);
+  transition: background 0.2s;
+  margin-bottom: 20px;
+}
+
+.back-btn:hover { background: var(--rose-hover); }
+
+.card {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+  padding: 26px;
+  box-shadow: var(--shadow);
+  max-width: 720px;
+  margin: 0 auto 20px;
+  border: 1px solid rgba(255,200,210,0.4);
+}
+
+.section-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* ---- PERSON TOGGLE ---- */
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 auto 20px;
+  max-width: 720px;
+}
+
+.toggle-btn {
+  flex: 1;
+  max-width: 200px;
+  padding: 10px;
+  text-align: center;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: 1.5px solid var(--rose-mid);
+  background: rgba(255,255,255,0.7);
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.toggle-btn.active-a {
+  background: linear-gradient(135deg, #ff7a95, var(--rose));
+  color: white;
+  border-color: var(--rose);
+  box-shadow: 0 4px 14px rgba(232,82,106,0.3);
+}
+
+.toggle-btn.active-b {
+  background: linear-gradient(135deg, #7a9eff, #5070e0);
+  color: white;
+  border-color: #5070e0;
+  box-shadow: 0 4px 14px rgba(80,112,224,0.3);
+}
+
+/* ---- CALENDAR ---- */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.month-nav button {
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  background: var(--rose-pale);
+  color: var(--rose);
+  border: 1.5px solid var(--rose-mid);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.month-nav button:hover { background: var(--rose-hover); }
+
+#monthTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.cal-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  max-width: 100%;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.day {
+  border-radius: 10px;
+  min-height: 80px;
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  border: 1.5px solid #f0e0e5;
+  background: #fff8f9;
+  overflow: hidden;
+}
+
+.day:hover { background: var(--rose-hover); border-color: var(--rose-light); transform: scale(1.02); }
+.day.selected { border-color: var(--rose); background: #ffe0e8; box-shadow: 0 0 0 2px rgba(232,82,106,0.2); }
+.day.today .day-num { color: var(--rose); font-weight: 700; }
+
+.day-num {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.workout-chip {
+  font-size: 0.55rem;
+  padding: 2px 5px;
+  border-radius: 5px;
+  margin-bottom: 2px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip-a {
+  background: rgba(232,82,106,0.12);
+  color: var(--rose);
+}
+
+.chip-b {
+  background: rgba(80,112,224,0.12);
+  color: #5070e0;
+}
+
+.chip-done { opacity: 0.7; }
+.chip-missed { text-decoration: line-through; opacity: 0.5; }
+
+.chip-mark {
+  font-size: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* ---- WORKOUT FORM ---- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+input[type="text"], input[type="number"], select {
+  padding: 10px 14px;
+  border: 1.5px solid #f0d0d8;
+  border-radius: 10px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text);
+  background: #fff8f9;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus {
+  border-color: var(--rose-light);
+  box-shadow: 0 0 0 3px rgba(232,82,106,0.08);
+}
+
+select { cursor: pointer; }
+
+.field-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+/* ---- BUTTONS ---- */
+button.btn-add {
+  padding: 11px 28px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--rose-light), var(--rose));
+  color: white;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(232,82,106,0.25);
+}
+
+button.btn-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(232,82,106,0.35);
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.btn-attend {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-attend.yes {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  color: white;
+  box-shadow: 0 3px 10px rgba(76,175,80,0.25);
+}
+
+.btn-attend.yes:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(76,175,80,0.35); }
+
+.btn-attend.no {
+  background: linear-gradient(135deg, #ff7043, #e64a19);
+  color: white;
+  box-shadow: 0 3px 10px rgba(255,112,67,0.25);
+}
+
+.btn-attend.no:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(255,112,67,0.35); }
+
+/* ---- SELECTED DAY PANEL ---- */
+.day-panel {
+  background: #fff8f9;
+  border: 1.5px solid #f0d8dc;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.day-panel-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.workout-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  gap: 8px;
+}
+
+.wli-a { background: rgba(232,82,106,0.08); border: 1px solid rgba(232,82,106,0.2); }
+.wli-b { background: rgba(80,112,224,0.08); border: 1px solid rgba(80,112,224,0.2); }
+
+.wli-info { flex: 1; }
+.wli-name { font-weight: 600; font-size: 0.88rem; }
+.wli-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+.wli-owner { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 7px; border-radius: 20px; }
+.owner-a { background: rgba(232,82,106,0.12); color: var(--rose); }
+.owner-b { background: rgba(80,112,224,0.12); color: #5070e0; }
+
+.wli-status {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+.wli-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.mini-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-family: 'Jost', sans-serif;
+}
+
+.mini-yes { background: rgba(76,175,80,0.15); color: var(--green); }
+.mini-yes:hover { background: rgba(76,175,80,0.3); transform: scale(1.1); }
+.mini-no { background: rgba(224,80,80,0.15); color: var(--red); }
+.mini-no:hover { background: rgba(224,80,80,0.3); transform: scale(1.1); }
+.mini-del { background: rgba(160,120,138,0.1); color: var(--text-muted); font-size: 0.7rem; }
+.mini-del:hover { background: rgba(224,80,80,0.15); color: var(--red); }
+
+/* ---- STATS ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.stat-card {
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-a { background: linear-gradient(135deg, rgba(232,82,106,0.07), rgba(232,82,106,0.03)); border: 1.5px solid rgba(232,82,106,0.15); }
+.stat-b { background: linear-gradient(135deg, rgba(80,112,224,0.07), rgba(80,112,224,0.03)); border: 1.5px solid rgba(80,112,224,0.15); }
+
+.stat-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.stat-name-a { color: var(--rose); }
+.stat-name-b { color: #5070e0; }
+
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-sub { font-size: 0.72rem; color: var(--text-muted); }
+
+.streak-bar {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.streak-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.dot-done { background: var(--green); }
+.dot-miss { background: var(--red); opacity: 0.4; }
+.dot-empty { background: #f0d8dc; }
+
+/* ---- DIVIDER ---- */
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #f0d0d8, transparent);
+  margin: 4px 0 16px;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 520px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .day { min-height: 60px; }
+}
+
+</style>
+</head>
+<body>
+
+<div style="max-width:720px; margin:0 auto;">
+  <a class="back-btn" href="index.html">← Back</a>
+</div>
+
+<header>
+  <h1>🏋️ Workout</h1>
+  <p class="subtitle">Log your fitness together — every rep counts</p>
+</header>
+
+<div id="setupNotice" class="card" style="display:none; text-align:center; padding:30px; color:var(--text-muted);">
+  <p>You need to set up your profile first.<br><a href="index.html" style="color:var(--rose); font-weight:600;">← Go back to set up</a></p>
+</div>
+
+<div id="appContent" style="display:none;">
+
+  <!-- View Toggle -->
+  <div class="view-toggle">
+    <div class="toggle-btn" id="toggleA" onclick="setView('A')"></div>
+    <div class="toggle-btn" id="toggleB" onclick="setView('B')">Both</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="card">
+    <div class="section-label">This Month's Stats</div>
+    <div class="stats-grid">
+      <div class="stat-card stat-a">
+        <div class="stat-name stat-name-a" id="statNameA">Person A</div>
+        <div class="stat-number" id="statDoneA">0</div>
+        <div class="stat-sub">workouts completed</div>
+        <div style="margin-top:6px; font-size:0.75rem; color:var(--green);" id="streakA">🔥 streak: 0</div>
+        <div class="streak-bar" id="streakBarA"></div>
+      </div>
+      <div class="stat-card stat-b">
+        <div class="stat-name stat-name-b" id="statNameB">Person B</div>
+        <div class="stat-number" id="statDoneB">0</div>
+        <div class="stat-sub">workouts completed</div>
+        <div style="margin-top:6px; font-size:0.75rem; color:var(--green);" id="streakB">🔥 streak: 0</div>
+        <div class="streak-bar" id="streakBarB"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar -->
+  <div class="card">
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div id="monthTitle" style="font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--text-muted);"></div>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="cal-header">
+      <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+    </div>
+    <div id="calendar"></div>
+
+    <!-- Selected day panel -->
+    <div id="dayPanel" style="display:none;" class="day-panel">
+      <div class="day-panel-title" id="dayPanelTitle">Selected Day</div>
+      <div id="dayWorkoutList"></div>
+    </div>
+  </div>
+
+  <!-- Add Workout -->
+  <div class="card">
+    <div class="section-label">Add Workout to Selected Day</div>
+
+    <div class="form-grid">
+      <div>
+        <div class="field-label">Workout Name</div>
+        <input type="text" id="workoutName" placeholder="e.g. Morning Run, Leg Day...">
+      </div>
+      <div>
+        <div class="field-label">Type</div>
+        <select id="workoutType">
+          <option value="Cardio">🏃 Cardio</option>
+          <option value="Strength">💪 Strength</option>
+          <option value="Yoga">🧘 Yoga / Stretch</option>
+          <option value="HIIT">⚡ HIIT</option>
+          <option value="Cycling">🚴 Cycling</option>
+          <option value="Swimming">🏊 Swimming</option>
+          <option value="Sports">⚽ Sports</option>
+          <option value="Walk">🚶 Walk / Hike</option>
+          <option value="Other">✨ Other</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Duration (mins)</div>
+        <input type="number" id="workoutDuration" placeholder="30" min="1" max="300">
+      </div>
+      <div>
+        <div class="field-label">Notes (optional)</div>
+        <input type="text" id="workoutNotes" placeholder="PRs, feelings, goals...">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-add" onclick="addWorkout()">+ Add to Calendar</button>
+    </div>
+
+    <p style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-top:10px;">
+      Select a day on the calendar first, then add your workout.
+    </p>
+  </div>
+
+</div>
+
+<script>
+
+/* ---- STATE ---- */
+let user = "", couple = "", nameA = "", nameB = ""
+let workouts = {} // key: "YYYY-M-D" → array of workout objects
+let calYear, calMonth
+let selectedDate = null
+let currentView = "both" // "A", "B", "both"
+
+/* ---- INIT ---- */
+window.addEventListener("load", () => {
+  let saved = localStorage.getItem("rdTracker_lastSession")
+  if (!saved) { document.getElementById("setupNotice").style.display = "block"; return }
+  try {
+    let s = JSON.parse(saved)
+    user = s.user || ""
+    couple = s.coupleCode || "default"
+    nameA = s.nameA || "Person A"
+    nameB = s.nameB || "Person B"
+    if (!user) { document.getElementById("setupNotice").style.display = "block"; return }
+  } catch(e) { document.getElementById("setupNotice").style.display = "block"; return }
+
+  document.getElementById("appContent").style.display = "block"
+
+  // Set names
+  document.getElementById("statNameA").innerText = nameA
+  document.getElementById("statNameB").innerText = nameB
+  document.getElementById("toggleA").innerText = "Both"
+  updateToggleLabels()
+
+  // Load data
+  let stored = localStorage.getItem("workout_" + couple)
+  if (stored) { try { workouts = JSON.parse(stored) } catch(e) {} }
+
+  // Init calendar
+  let now = new Date()
+  calYear = now.getFullYear()
+  calMonth = now.getMonth()
+
+  setView("both")
+  listenFirebase()
+})
+
+function updateToggleLabels() {
+  document.getElementById("toggleA").innerText = nameA
+  document.getElementById("toggleB").innerText = nameB
+  document.getElementById("statNameA").innerText = nameA
+  document.getElementById("statNameB").innerText = nameB
+}
+
+/* ---- VIEW TOGGLE ---- */
+function setView(v) {
+  currentView = v
+  document.getElementById("toggleA").className = "toggle-btn" + (v === "A" ? " active-a" : "")
+  document.getElementById("toggleB").className = "toggle-btn" + (v === "B" ? " active-b" : "")
+  // If neither: show "both" state
+  if (v === "both") {
+    document.getElementById("toggleA").className = "toggle-btn active-a"
+    document.getElementById("toggleB").className = "toggle-btn active-b"
+  }
+  loadCalendar()
+}
+
+/* ---- CALENDAR ---- */
+function changeMonth(dir) {
+  calMonth += dir
+  if (calMonth > 11) { calMonth = 0; calYear++ }
+  if (calMonth < 0) { calMonth = 11; calYear-- }
+  selectedDate = null
+  document.getElementById("dayPanel").style.display = "none"
+  loadCalendar()
+}
+
+function loadCalendar() {
+  let cal = document.getElementById("calendar")
+  cal.innerHTML = ""
+
+  let now = new Date()
+  let firstDay = new Date(calYear, calMonth, 1).getDay()
+  let daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+
+  document.getElementById("monthTitle").innerText =
+    new Date(calYear, calMonth, 1).toLocaleString("default", { month: "long" }) + " " + calYear
+
+  for (let i = 0; i < firstDay; i++) cal.appendChild(document.createElement("div"))
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    let div = document.createElement("div")
+    div.className = "day"
+    if (now.getFullYear() === calYear && now.getMonth() === calMonth && now.getDate() === day) {
+      div.classList.add("today")
+    }
+    if (selectedDate === day) div.classList.add("selected")
+
+    div.innerHTML = `<div class="day-num">${day}</div>`
+
+    let key = getKey(day)
+    let dayWorkouts = workouts[key] || []
+
+    dayWorkouts.forEach(w => {
+      let show = currentView === "both" || w.owner === currentView
+      if (!show) return
+      let chip = document.createElement("div")
+      chip.className = "workout-chip chip-" + w.owner.toLowerCase()
+      if (w.status === "done") chip.classList.add("chip-done")
+      if (w.status === "missed") chip.classList.add("chip-missed")
+      let mark = w.status === "done" ? "✔" : w.status === "missed" ? "✖" : ""
+      chip.innerHTML = `<span style="overflow:hidden;text-overflow:ellipsis;">${w.name}</span><span class="chip-mark">${mark}</span>`
+      div.appendChild(chip)
+    })
+
+    div.onclick = () => selectDay(day, div)
+    cal.appendChild(div)
+  }
+
+  updateStats()
+}
+
+function selectDay(day, el) {
+  selectedDate = day
+  document.querySelectorAll(".day").forEach(d => d.classList.remove("selected"))
+  el.classList.add("selected")
+  renderDayPanel(day)
+}
+
+function getKey(day) {
+  return calYear + "-" + calMonth + "-" + day
+}
+
+/* ---- DAY PANEL ---- */
+function renderDayPanel(day) {
+  let key = getKey(day)
+  let dayWorkouts = workouts[key] || []
+  let panel = document.getElementById("dayPanel")
+  let title = document.getElementById("dayPanelTitle")
+  let list = document.getElementById("dayWorkoutList")
+
+  let d = new Date(calYear, calMonth, day)
+  title.innerText = d.toLocaleDateString("default", { weekday: "long", month: "long", day: "numeric" })
+
+  if (!dayWorkouts.length) {
+    list.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:12px;">No workouts logged for this day yet.</div>`
+  } else {
+    list.innerHTML = dayWorkouts.map((w, i) => {
+      let canEdit = w.owner === user
+      let meta = [w.type, w.duration ? w.duration + " min" : "", w.notes].filter(Boolean).join(" · ")
+      return `
+        <div class="workout-list-item wli-${w.owner.toLowerCase()}">
+          <div class="wli-info">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;">
+              <span class="wli-name">${w.name}</span>
+              <span class="wli-owner owner-${w.owner.toLowerCase()}">${w.owner === "A" ? nameA : nameB}</span>
+            </div>
+            <div class="wli-meta">${meta}</div>
+          </div>
+          <div class="wli-status">${w.status === "done" ? "✔️" : w.status === "missed" ? "❌" : "⏳"}</div>
+          ${canEdit ? `
+          <div class="wli-actions">
+            <button class="mini-btn mini-yes" title="Done" onclick="markWorkout('${key}',${i},'done')">✔</button>
+            <button class="mini-btn mini-no" title="Missed" onclick="markWorkout('${key}',${i},'missed')">✖</button>
+            <button class="mini-btn mini-del" title="Delete" onclick="deleteWorkout('${key}',${i})">🗑</button>
+          </div>` : ""}
+        </div>
+      `
+    }).join("")
+  }
+
+  panel.style.display = "block"
+}
+
+/* ---- WORKOUT CRUD ---- */
+function addWorkout() {
+  if (!selectedDate) { alert("Please select a day on the calendar first."); return }
+  let name = document.getElementById("workoutName").value.trim()
+  if (!name) { alert("Please enter a workout name."); return }
+
+  let key = getKey(selectedDate)
+  if (!workouts[key]) workouts[key] = []
+
+  workouts[key].push({
+    name,
+    type: document.getElementById("workoutType").value,
+    duration: document.getElementById("workoutDuration").value || "",
+    notes: document.getElementById("workoutNotes").value.trim(),
+    owner: user,
+    status: "pending",
+    added: Date.now()
+  })
+
+  // Clear form
+  document.getElementById("workoutName").value = ""
+  document.getElementById("workoutDuration").value = ""
+  document.getElementById("workoutNotes").value = ""
+
+  saveData()
+  loadCalendar()
+  renderDayPanel(selectedDate)
+
+  // Reselect
+  document.querySelectorAll(".day").forEach(d => {
+    let dn = d.querySelector(".day-num")
+    if (dn && parseInt(dn.innerText) === selectedDate) d.classList.add("selected")
+  })
+}
+
+function markWorkout(key, index, status) {
+  if (!workouts[key] || !workouts[key][index]) return
+  let w = workouts[key][index]
+  if (w.owner !== user) { alert("You can only mark your own workouts."); return }
+  w.status = w.status === status ? "pending" : status // toggle
+  saveData()
+  loadCalendar()
+  if (selectedDate) {
+    renderDayPanel(selectedDate)
+    document.querySelectorAll(".day").forEach(d => {
+      let dn = d.querySelector(".day-num")
+      if (dn && parseInt(dn.innerText) === selectedDate) d.classList.add("selected")
+    })
+  }
+}
+
+function deleteWorkout(key, index) {
+  if (!workouts[key]) return
+  let w = workouts[key][index]
+  if (w.owner !== user) { alert("You can only delete your own workouts."); return }
+  if (!confirm("Delete this workout?")) return
+  workouts[key].splice(index, 1)
+  if (!workouts[key].length) delete workouts[key]
+  saveData()
+  loadCalendar()
+  if (selectedDate) renderDayPanel(selectedDate)
+}
+
+/* ---- STATS ---- */
+function updateStats() {
+  let doneA = 0, doneB = 0
+  let streakA = 0, streakB = 0
+
+  // Count completed in current month
+  for (let day = 1; day <= new Date(calYear, calMonth + 1, 0).getDate(); day++) {
+    let key = getKey(day)
+    let ws = workouts[key] || []
+    ws.forEach(w => {
+      if (w.status === "done") {
+        if (w.owner === "A") doneA++
+        if (w.owner === "B") doneB++
+      }
+    })
+  }
+
+  // Streak: count consecutive days with at least 1 done workout going back from today
+  let now = new Date()
+  let calcStreak = (owner) => {
+    let streak = 0
+    for (let back = 0; back < 60; back++) {
+      let d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - back)
+      let k = d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate()
+      let ws = workouts[k] || []
+      let hasDone = ws.some(w => w.owner === owner && w.status === "done")
+      if (hasDone) streak++
+      else if (back > 0) break
+    }
+    return streak
+  }
+
+  streakA = calcStreak("A")
+  streakB = calcStreak("B")
+
+  document.getElementById("statDoneA").innerText = doneA
+  document.getElementById("statDoneB").innerText = doneB
+  document.getElementById("streakA").innerText = "🔥 streak: " + streakA + (streakA === 1 ? " day" : " days")
+  document.getElementById("streakB").innerText = "🔥 streak: " + streakB + (streakB === 1 ? " day" : " days")
+
+  // Mini streak bars (last 14 days)
+  renderStreakBar("streakBarA", "A")
+  renderStreakBar("streakBarB", "B")
+}
+
+function renderStreakBar(containerId, owner) {
+  let bar = document.getElementById(containerId)
+  let now = new Date()
+  bar.innerHTML = ""
+  for (let back = 13; back >= 0; back--) {
+    let d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - back)
+    let k = d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate()
+    let ws = workouts[k] || []
+    let hasDone = ws.some(w => w.owner === owner && w.status === "done")
+    let hasMissed = ws.some(w => w.owner === owner && w.status === "missed")
+    let hasAny = ws.some(w => w.owner === owner)
+    let dot = document.createElement("div")
+    dot.className = "streak-dot " + (hasDone ? "dot-done" : hasMissed ? "dot-miss" : "dot-empty")
+    dot.title = d.toLocaleDateString()
+    bar.appendChild(dot)
+  }
+}
+
+/* ---- STORAGE ---- */
+function saveData() {
+  localStorage.setItem("workout_" + couple, JSON.stringify(workouts))
+  if (window.db) {
+    window.setDoc(window.doc(window.db, "workouts", couple), { workouts }).catch(() => {})
+  }
+}
+
+function listenFirebase() {
+  if (!window.db) return
+  try {
+    window.onSnapshot(window.doc(window.db, "workouts", couple), (snap) => {
+      let data = snap.data()
+      if (!data || !data.workouts) return
+      workouts = data.workouts
+      localStorage.setItem("workout_" + couple, JSON.stringify(workouts))
+      loadCalendar()
+      if (selectedDate) renderDayPanel(selectedDate)
+    })
+  } catch(e) {}
+}
+
+</script>
+</body>
+</html>

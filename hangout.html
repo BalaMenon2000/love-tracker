@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ff6b81">
+<script type="module" src="firebase.js"></script>
+<title>Hang Out — LDR Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --rose: #e8526a;
+  --rose-light: #f07080;
+  --rose-pale: #fdf2f4;
+  --rose-hover: #fde0e5;
+  --rose-mid: #f5c0ca;
+  --plum: #7c3a6e;
+  --sky: #4a8fb5;
+  --green: #4a9e6f;
+  --text: #2e1820;
+  --text-muted: #a0788a;
+  --white: #ffffff;
+  --shadow: 0 6px 28px rgba(232,82,106,0.10);
+  --shadow-lg: 0 12px 48px rgba(232,82,106,0.15);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--rose-pale);
+  background-image:
+    radial-gradient(ellipse 70% 50% at 5% 10%, rgba(200,140,220,0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(255,160,185,0.25) 0%, transparent 60%);
+  min-height: 100vh;
+  color: var(--text);
+  padding: 28px 16px 80px;
+}
+
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--rose);
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin-top: 4px;
+  margin-bottom: 28px;
+}
+
+header { text-align: center; margin-bottom: 24px; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid var(--rose-mid);
+  transition: background 0.2s;
+  margin-bottom: 20px;
+}
+
+.back-btn:hover { background: var(--rose-hover); }
+
+.card {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+  padding: 26px;
+  box-shadow: var(--shadow);
+  max-width: 680px;
+  margin: 0 auto 20px;
+  border: 1px solid rgba(255,200,210,0.4);
+}
+
+.section-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+/* ---- TABS ---- */
+.tabs {
+  display: flex;
+  gap: 8px;
+  max-width: 680px;
+  margin: 0 auto 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.7);
+  border: 1.5px solid var(--rose-mid);
+  color: var(--text-muted);
+}
+
+.tab.active {
+  background: var(--rose);
+  color: white;
+  border-color: var(--rose);
+  box-shadow: 0 4px 14px rgba(232,82,106,0.3);
+}
+
+.tab:hover:not(.active) {
+  background: var(--rose-hover);
+  border-color: var(--rose-light);
+}
+
+/* ---- QUESTION CARD ---- */
+.question-box {
+  background: linear-gradient(135deg, #fff5f7, #ffedf0);
+  border: 1.5px solid var(--rose-mid);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.question-box::before {
+  content: '"';
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 8rem;
+  color: rgba(232,82,106,0.08);
+  position: absolute;
+  top: -20px;
+  left: 8px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.question-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+  position: relative;
+}
+
+.question-category {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.cat-relationship { background: rgba(232,82,106,0.1); color: var(--rose); }
+.cat-hypothetical { background: rgba(124,58,110,0.1); color: var(--plum); }
+.cat-future { background: rgba(74,143,181,0.1); color: var(--sky); }
+.cat-deep { background: rgba(74,158,111,0.1); color: var(--green); }
+
+/* ---- ANSWER AREA ---- */
+.answer-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #f0d0d8;
+  border-radius: 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: #fff8f9;
+  outline: none;
+  resize: vertical;
+  min-height: 90px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea:focus {
+  border-color: var(--rose-light);
+  box-shadow: 0 0 0 3px rgba(232,82,106,0.08);
+}
+
+textarea.locked {
+  background: #f8f0f2;
+  color: var(--text-muted);
+  cursor: not-allowed;
+  font-style: italic;
+}
+
+/* ---- BUTTONS ---- */
+button {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 10px;
+  background: var(--rose-light);
+  color: white;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(232,82,106,0.2);
+}
+
+button:hover {
+  background: var(--rose);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(232,82,106,0.3);
+}
+
+button:active { transform: translateY(0); }
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--rose-light), var(--rose));
+  font-weight: 600;
+  padding: 12px 30px;
+}
+
+.btn-new {
+  background: rgba(255,255,255,0.9);
+  color: var(--rose);
+  border: 1.5px solid var(--rose-mid);
+  box-shadow: none;
+}
+.btn-new:hover { background: var(--rose-hover); color: var(--rose); }
+
+.btn-reveal {
+  background: linear-gradient(135deg, var(--plum), #9b4d8a);
+  font-weight: 600;
+  padding: 12px 30px;
+  box-shadow: 0 4px 16px rgba(124,58,110,0.3);
+}
+
+.btn-reveal:hover {
+  background: linear-gradient(135deg, #6e3060, var(--plum));
+  box-shadow: 0 6px 20px rgba(124,58,110,0.4);
+}
+
+/* ---- STATUS PANEL ---- */
+.status-panel {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.person-status {
+  flex: 1;
+  max-width: 200px;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1.5px solid #f0d0d8;
+  background: #fff8f9;
+  transition: all 0.3s;
+}
+
+.person-status.answered {
+  background: linear-gradient(135deg, rgba(74,158,111,0.1), rgba(74,158,111,0.05));
+  border-color: var(--green);
+}
+
+.person-status .status-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.person-status .status-icon {
+  font-size: 1.3rem;
+}
+
+/* ---- REVEAL CARDS ---- */
+.reveal-container {
+  display: none;
+  gap: 16px;
+  flex-direction: column;
+  margin-top: 20px;
+  animation: fadeSlide 0.5s ease;
+}
+
+.reveal-container.visible {
+  display: flex;
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal-card {
+  border-radius: 14px;
+  padding: 20px;
+  border: 1.5px solid;
+}
+
+.reveal-card.card-a {
+  background: linear-gradient(135deg, #fff5f7, #ffe8ec);
+  border-color: var(--rose-mid);
+}
+
+.reveal-card.card-b {
+  background: linear-gradient(135deg, #f5f0ff, #ede0f7);
+  border-color: #d4b0e0;
+}
+
+.reveal-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.reveal-answer {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* ---- WAITING NOTICE ---- */
+.waiting-notice {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.waiting-dots::after {
+  content: '';
+  animation: dots 1.5s steps(3,end) infinite;
+}
+
+@keyframes dots {
+  0%,20% { content: '.'; }
+  40% { content: '..'; }
+  60%,100% { content: '...'; }
+}
+
+/* ---- HISTORY ---- */
+.history-item {
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #f0d8dc;
+  background: #fff8f9;
+  margin-bottom: 10px;
+}
+
+.history-question {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.history-answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.history-answer {
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.history-answer.a-side { background: #fff0f3; }
+.history-answer.b-side { background: #f5f0ff; }
+
+.h-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+}
+
+/* ---- DIVIDER ---- */
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #f0d0d8, transparent);
+  margin: 4px 0 16px;
+}
+
+/* ---- SETUP INLINE ---- */
+#setupNotice {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+#setupNotice a {
+  color: var(--rose);
+  font-weight: 600;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 520px) {
+  .history-answers { grid-template-columns: 1fr; }
+  .status-panel { flex-direction: column; align-items: center; }
+  .person-status { max-width: 100%; width: 100%; }
+}
+
+</style>
+</head>
+<body>
+
+<div style="max-width:680px; margin:0 auto;">
+  <a class="back-btn" href="index.html">← Back</a>
+</div>
+
+<header>
+  <h1>🫶 Hang Out</h1>
+  <p class="subtitle">Questions & scenarios for two — answers revealed together</p>
+</header>
+
+<div id="setupNotice" class="card" style="display:none;">
+  <p>You need to set up your profile first.<br><a href="index.html">← Go back to set up</a></p>
+</div>
+
+<div id="appContent" style="display:none;">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('questions')">💬 Questions</div>
+    <div class="tab" onclick="switchTab('scenarios')">🎲 Scenarios</div>
+    <div class="tab" onclick="switchTab('history')">📖 History</div>
+  </div>
+
+  <!-- Questions Tab -->
+  <div id="tab-questions" class="tab-content">
+    <div class="card">
+      <div id="qCategoryBadge" class="question-category cat-relationship">Relationship</div>
+      <div class="question-box">
+        <div id="questionText" class="question-text">Loading question...</div>
+      </div>
+
+      <!-- Status panel -->
+      <div class="status-panel">
+        <div class="person-status" id="statusA">
+          <div class="status-icon">⏳</div>
+          <div class="status-name" id="statusNameA">Person A</div>
+        </div>
+        <div class="person-status" id="statusB">
+          <div class="status-icon">⏳</div>
+          <div class="status-name" id="statusNameB">Person B</div>
+        </div>
+      </div>
+
+      <!-- Answer area -->
+      <div id="answerPhase" class="answer-area">
+        <textarea id="myAnswer" placeholder="Your answer (only you can see this until both have answered)..."></textarea>
+        <div class="btn-row">
+          <button class="btn-new" onclick="newQuestion('questions')">🔀 New Question</button>
+          <button class="btn-submit" id="submitBtn" onclick="submitAnswer('questions')">Lock In Answer ✓</button>
+        </div>
+      </div>
+
+      <!-- Waiting state -->
+      <div id="waitingPhase" style="display:none;">
+        <div class="waiting-notice">
+          Your answer is locked in 🔒<br>
+          <span style="font-size:0.82rem;">Waiting for your partner<span class="waiting-dots"></span></span>
+        </div>
+        <div class="btn-row">
+          <button class="btn-reveal" id="revealBtn" onclick="revealAnswers('questions')" disabled>Reveal Both Answers</button>
+        </div>
+      </div>
+
+      <!-- Reveal area -->
+      <div id="revealPhase" class="reveal-container">
+        <div class="reveal-card card-a">
+          <div class="reveal-name" id="revealNameA">Person A</div>
+          <div class="reveal-answer" id="revealAnswerA">—</div>
+        </div>
+        <div class="reveal-card card-b">
+          <div class="reveal-name" id="revealNameB">Person B</div>
+          <div class="reveal-answer" id="revealAnswerB">—</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-new" onclick="newQuestion('questions')">Next Question →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenarios Tab -->
+  <div id="tab-scenarios" class="tab-content" style="display:none;">
+    <div class="card">
+      <div id="sCategoryBadge" class="question-category cat-hypothetical">Hypothetical</div>
+      <div class="question-box">
+        <div id="scenarioText" class="question-text">Loading scenario...</div>
+      </div>
+
+      <div class="status-panel">
+        <div class="person-status" id="sStatusA">
+          <div class="status-icon">⏳</div>
+          <div class="status-name" id="sStatusNameA">Person A</div>
+        </div>
+        <div class="person-status" id="sStatusB">
+          <div class="status-icon">⏳</div>
+          <div class="status-name" id="sStatusNameB">Person B</div>
+        </div>
+      </div>
+
+      <div id="sAnswerPhase" class="answer-area">
+        <textarea id="sMyAnswer" placeholder="What would you do? (locked until your partner also answers)..."></textarea>
+        <div class="btn-row">
+          <button class="btn-new" onclick="newQuestion('scenarios')">🔀 New Scenario</button>
+          <button class="btn-submit" id="sSubmitBtn" onclick="submitAnswer('scenarios')">Lock In Answer ✓</button>
+        </div>
+      </div>
+
+      <div id="sWaitingPhase" style="display:none;">
+        <div class="waiting-notice">
+          Your answer is locked in 🔒<br>
+          <span style="font-size:0.82rem;">Waiting for your partner<span class="waiting-dots"></span></span>
+        </div>
+        <div class="btn-row">
+          <button class="btn-reveal" id="sRevealBtn" onclick="revealAnswers('scenarios')" disabled>Reveal Both Answers</button>
+        </div>
+      </div>
+
+      <div id="sRevealPhase" class="reveal-container">
+        <div class="reveal-card card-a">
+          <div class="reveal-name" id="sRevealNameA">Person A</div>
+          <div class="reveal-answer" id="sRevealAnswerA">—</div>
+        </div>
+        <div class="reveal-card card-b">
+          <div class="reveal-name" id="sRevealNameB">Person B</div>
+          <div class="reveal-answer" id="sRevealAnswerB">—</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-new" onclick="newQuestion('scenarios')">Next Scenario →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Tab -->
+  <div id="tab-history" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="section-label">Past Answers</div>
+      <div id="historyList">
+        <div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">
+          No revealed answers yet — complete some questions first!
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+/* ---- DATA ---- */
+
+const QUESTIONS = {
+  relationship: [
+    "What's your favourite memory of us together so far?",
+    "What's one small thing I do that makes you feel loved?",
+    "What do you think is our biggest strength as a couple?",
+    "What's something you've never told me but want me to know?",
+    "How do you feel about where we are in our relationship right now?",
+    "What's one habit of mine you secretly find adorable?",
+    "What's a dream you've had about our future together?",
+    "What does a perfect day with me look like to you?",
+    "What's something you're nervous to bring up but want to talk about?",
+    "When do you feel most connected to me, even from a distance?",
+    "What's something I've said that stuck with you?",
+    "What do you wish we did more of together?",
+    "If we could spend one whole day doing anything, what would you choose?",
+    "What's a way I've helped you grow as a person?",
+    "What do you think is the most important thing for us to work on together?"
+  ],
+  deep: [
+    "What are you most afraid of in life, and have I ever helped ease that fear?",
+    "Do you think long distance has made us stronger or more vulnerable?",
+    "What's something you genuinely regret and how has it shaped you?",
+    "What does 'home' mean to you — is it a place or a person?",
+    "If you could change one thing about how we communicate, what would it be?",
+    "What's a version of yourself you're still working toward?",
+    "What belief about love did you have before us that we've changed?",
+    "What's the hardest part of missing me — what do you miss most?",
+    "If everything stayed exactly as it is now for 5 more years, how would you feel?",
+    "What's something you need from a relationship that you've never asked for?"
+  ],
+  future: [
+    "Where do you picture us living in 5 years?",
+    "What's one tradition you want us to start?",
+    "What kind of home do you imagine us building together?",
+    "How many kids do you want, if any — and what kind of parents do you think we'd be?",
+    "What's a country you want us to visit together and why?",
+    "How do you imagine us handling big life decisions — career, moving, family?",
+    "What does a really happy life with me look like to you?",
+    "What's the first big trip you want us to take once we're in the same place?",
+    "What's something on your bucket list you want us to do together?",
+    "How do you feel about the end game of this long distance — what's your vision?"
+  ]
+}
+
+const SCENARIOS = [
+  { text: "You find out your partner turned down their dream job to be closer to you — without telling you. What do you do?", cat: "hypothetical" },
+  { text: "You both win an all-expenses trip but to completely opposite places you've always wanted to go — and you have to choose one. Which wins?", cat: "hypothetical" },
+  { text: "You're stranded in an airport for 24 hours. What do you do to pass the time?", cat: "hypothetical" },
+  { text: "One of you gets a huge opportunity that means long distance for another 2 years. How do you handle it?", cat: "hypothetical" },
+  { text: "You accidentally see your partner's messages open on their phone. You notice something odd — what do you do?", cat: "deep" },
+  { text: "You could press a button to skip the distance phase and teleport to being already living together — but you lose the memories of this long distance era. Do you press it?", cat: "hypothetical" },
+  { text: "You're at a party and someone is clearly flirting with you — your partner isn't there. How do you handle it and do you tell them later?", cat: "hypothetical" },
+  { text: "Your partner's friends don't like you. They haven't said it, but you can feel it. How do you approach it?", cat: "deep" },
+  { text: "You could read your partner's honest inner thoughts for one full day, but they'd also read yours. Would you do it?", cat: "hypothetical" },
+  { text: "You both get into arguments differently — one of you shuts down, one wants to talk it out. How do you find a middle ground?", cat: "deep" },
+  { text: "An ex of yours reaches out saying they want to reconnect as friends. What do you do and how do you tell your partner?", cat: "hypothetical" },
+  { text: "You could only communicate for 10 minutes a day for one month. How would you make those 10 minutes count?", cat: "hypothetical" },
+  { text: "You've planned a visit for months but something major comes up and you have to cancel. How do you handle the fallout?", cat: "deep" },
+  { text: "Your partner tells you they want to slow things down — no break-up, just less intensity. What's your first reaction?", cat: "deep" },
+  { text: "You both wake up tomorrow in the same city — permanently. What's the very first thing you do?", cat: "hypothetical" }
+]
+
+const CAT_CLASSES = {
+  relationship: "cat-relationship",
+  deep: "cat-deep",
+  future: "cat-future",
+  hypothetical: "cat-hypothetical"
+}
+
+const CAT_LABELS = {
+  relationship: "Relationship",
+  deep: "Deep",
+  future: "Future",
+  hypothetical: "Hypothetical"
+}
+
+/* ---- STATE ---- */
+
+let user = "", couple = "", nameA = "", nameB = ""
+let currentQuestion = { questions: null, scenarios: null }
+let history = []
+let activeTab = "questions"
+
+/* ---- INIT ---- */
+
+window.addEventListener("load", () => {
+  let saved = localStorage.getItem("rdTracker_lastSession")
+  if (!saved) {
+    document.getElementById("setupNotice").style.display = "block"
+    return
+  }
+  try {
+    let s = JSON.parse(saved)
+    user = s.user || ""
+    couple = s.coupleCode || "default"
+    nameA = s.nameA || "Person A"
+    nameB = s.nameB || "Person B"
+    if (!user) { document.getElementById("setupNotice").style.display = "block"; return }
+  } catch(e) {
+    document.getElementById("setupNotice").style.display = "block"; return
+  }
+
+  document.getElementById("appContent").style.display = "block"
+
+  // Load history
+  let h = localStorage.getItem("hangout_history_" + couple)
+  if (h) { try { history = JSON.parse(h) } catch(e) {} }
+
+  // Set names in status
+  document.getElementById("statusNameA").innerText = nameA
+  document.getElementById("statusNameB").innerText = nameB
+  document.getElementById("sStatusNameA").innerText = nameA
+  document.getElementById("sStatusNameB").innerText = nameB
+
+  newQuestion("questions")
+  newQuestion("scenarios")
+  listenFirebase()
+  renderHistory()
+})
+
+/* ---- TABS ---- */
+
+function switchTab(tab) {
+  activeTab = tab
+  document.querySelectorAll(".tab").forEach((t, i) => {
+    t.classList.toggle("active", ["questions","scenarios","history"][i] === tab)
+  })
+  document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none")
+  document.getElementById("tab-" + tab).style.display = "block"
+
+  if (tab === "history") renderHistory()
+}
+
+/* ---- QUESTION GENERATION ---- */
+
+function newQuestion(type) {
+  // Clear local answers for this round
+  localStorage.removeItem("hangout_myanswer_" + couple + "_" + type)
+
+  if (type === "questions") {
+    let allKeys = ["relationship","deep","future"]
+    let cat = allKeys[Math.floor(Math.random() * allKeys.length)]
+    let pool = QUESTIONS[cat]
+    let q = pool[Math.floor(Math.random() * pool.length)]
+    currentQuestion.questions = { text: q, cat }
+    document.getElementById("questionText").innerText = q
+    let badge = document.getElementById("qCategoryBadge")
+    badge.className = "question-category " + CAT_CLASSES[cat]
+    badge.innerText = CAT_LABELS[cat]
+    document.getElementById("myAnswer").value = ""
+    document.getElementById("myAnswer").disabled = false
+    document.getElementById("myAnswer").classList.remove("locked")
+    resetPhase("questions")
+    if (window.db) {
+      window.setDoc(window.doc(window.db, "hangout", couple + "_q"), {
+        question: q, cat, answerA: null, answerB: null, timestamp: Date.now()
+      }).catch(() => {})
+    }
+  } else {
+    let s = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]
+    currentQuestion.scenarios = s
+    document.getElementById("scenarioText").innerText = s.text
+    let badge = document.getElementById("sCategoryBadge")
+    badge.className = "question-category " + CAT_CLASSES[s.cat]
+    badge.innerText = CAT_LABELS[s.cat]
+    document.getElementById("sMyAnswer").value = ""
+    document.getElementById("sMyAnswer").disabled = false
+    document.getElementById("sMyAnswer").classList.remove("locked")
+    resetPhase("scenarios")
+    if (window.db) {
+      window.setDoc(window.doc(window.db, "hangout", couple + "_s"), {
+        question: s.text, cat: s.cat, answerA: null, answerB: null, timestamp: Date.now()
+      }).catch(() => {})
+    }
+  }
+
+  updateStatusPanels(type, false, false)
+}
+
+function resetPhase(type) {
+  let prefix = type === "questions" ? "" : "s"
+  show(prefix + "AnswerPhase")
+  hide(prefix + "WaitingPhase")
+  let rev = document.getElementById(prefix + "RevealPhase")
+  if (rev) rev.classList.remove("visible")
+}
+
+/* ---- SUBMIT ---- */
+
+function submitAnswer(type) {
+  let prefix = type === "questions" ? "" : "s"
+  let ta = document.getElementById(prefix + "MyAnswer")
+  let answer = ta.value.trim()
+  if (!answer) { alert("Please write your answer first!"); return }
+
+  ta.disabled = true
+  ta.classList.add("locked")
+  document.getElementById(prefix + "SubmitBtn").disabled = true
+
+  // Save answer
+  let field = "answer" + user
+  let docKey = couple + (type === "questions" ? "_q" : "_s")
+  if (window.db) {
+    let update = {}
+    update[field] = answer
+    window.updateDoc(window.doc(window.db, "hangout", docKey), update).catch(() => {
+      // Fallback to local
+      let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
+      local[field] = answer
+      localStorage.setItem("hangout_" + couple + "_" + type, JSON.stringify(local))
+    })
+  } else {
+    let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
+    local[field] = answer
+    localStorage.setItem("hangout_" + couple + "_" + type, JSON.stringify(local))
+  }
+
+  // Mark this user as answered
+  updateStatusPanels(type, user === "A", user === "B")
+
+  hide(prefix + "AnswerPhase")
+  show(prefix + "WaitingPhase")
+}
+
+/* ---- REVEAL ---- */
+
+function revealAnswers(type) {
+  let prefix = type === "questions" ? "" : "s"
+  let docKey = couple + (type === "questions" ? "_q" : "_s")
+
+  let doReveal = (aAnswer, bAnswer) => {
+    document.getElementById(prefix + "RevealNameA").innerText = nameA
+    document.getElementById(prefix + "RevealNameB").innerText = nameB
+    document.getElementById(prefix + "RevealAnswerA").innerText = aAnswer || "(no answer)"
+    document.getElementById(prefix + "RevealAnswerB").innerText = bAnswer || "(no answer)"
+
+    hide(prefix + "WaitingPhase")
+    let rev = document.getElementById(prefix + "RevealPhase")
+    rev.classList.add("visible")
+
+    // Save to history
+    let q = type === "questions" ? currentQuestion.questions : currentQuestion.scenarios
+    if (q && aAnswer && bAnswer) {
+      history.unshift({
+        question: q.text,
+        cat: q.cat,
+        answerA: aAnswer,
+        answerB: bAnswer,
+        nameA, nameB,
+        time: Date.now()
+      })
+      if (history.length > 50) history = history.slice(0, 50)
+      localStorage.setItem("hangout_history_" + couple, JSON.stringify(history))
+    }
+  }
+
+  if (window.db) {
+    window.getDoc(window.doc(window.db, "hangout", docKey)).then(snap => {
+      let d = snap.data() || {}
+      doReveal(d.answerA, d.answerB)
+    }).catch(() => {
+      let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
+      doReveal(local.answerA, local.answerB)
+    })
+  } else {
+    let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
+    doReveal(local.answerA, local.answerB)
+  }
+}
+
+/* ---- STATUS PANELS ---- */
+
+function updateStatusPanels(type, aAnswered, bAnswered) {
+  let prefix = type === "questions" ? "" : "s"
+  let stA = document.getElementById(prefix + "StatusA")
+  let stB = document.getElementById(prefix + "StatusB")
+  if (!stA) return
+
+  stA.querySelector(".status-icon").innerText = aAnswered ? "✅" : "⏳"
+  stB.querySelector(".status-icon").innerText = bAnswered ? "✅" : "⏳"
+  stA.classList.toggle("answered", aAnswered)
+  stB.classList.toggle("answered", bAnswered)
+
+  // Enable reveal if both answered
+  let revBtn = document.getElementById(prefix === "" ? "revealBtn" : "sRevealBtn")
+  if (revBtn) revBtn.disabled = !(aAnswered && bAnswered)
+}
+
+/* ---- FIREBASE LISTENER ---- */
+
+function listenFirebase() {
+  if (!window.db) return
+
+  let listenDoc = (docKey, type) => {
+    try {
+      window.onSnapshot(window.doc(window.db, "hangout", docKey), (snap) => {
+        let data = snap.data()
+        if (!data) return
+        let aAnswered = !!data.answerA
+        let bAnswered = !!data.answerB
+        updateStatusPanels(type, aAnswered, bAnswered)
+
+        let prefix = type === "questions" ? "" : "s"
+        let revBtn = document.getElementById(prefix === "" ? "revealBtn" : "sRevealBtn")
+        if (revBtn) revBtn.disabled = !(aAnswered && bAnswered)
+
+        // Update question if partner changed it
+        let myField = "answer" + user
+        let myLocked = document.getElementById(prefix + "MyAnswer")?.disabled
+        if (!myLocked && data.question) {
+          if (type === "questions") {
+            document.getElementById("questionText").innerText = data.question
+          } else {
+            document.getElementById("scenarioText").innerText = data.question
+          }
+        }
+      })
+    } catch(e) {}
+  }
+
+  listenDoc(couple + "_q", "questions")
+  listenDoc(couple + "_s", "scenarios")
+}
+
+/* ---- HISTORY ---- */
+
+function renderHistory() {
+  let list = document.getElementById("historyList")
+  if (!history.length) {
+    list.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">No revealed answers yet — complete some questions first!</div>`
+    return
+  }
+  list.innerHTML = history.map(item => `
+    <div class="history-item">
+      <div class="history-question">
+        <span class="question-category ${CAT_CLASSES[item.cat] || 'cat-relationship'}" style="margin-right:8px;">${CAT_LABELS[item.cat] || ''}</span>
+        ${item.question}
+      </div>
+      <div class="history-answers">
+        <div class="history-answer a-side">
+          <div class="h-name">${item.nameA}</div>
+          ${item.answerA}
+        </div>
+        <div class="history-answer b-side">
+          <div class="h-name">${item.nameB}</div>
+          ${item.answerB}
+        </div>
+      </div>
+    </div>
+  `).join("")
+}
+
+/* ---- HELPERS ---- */
+
+function show(id) { let el = document.getElementById(id); if(el) el.style.display = "block" }
+function hide(id) { let el = document.getElementById(id); if(el) el.style.display = "none" }
+
+</script>
+</body>
+</html>

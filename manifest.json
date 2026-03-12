@@ -1,15 +1,21 @@
 {
-"name":"Relationship Tracker",
-"short_name":"LoveTracker",
-"start_url":"index.html",
-"display":"standalone",
-"background_color":"#ffffff",
-"theme_color":"#ff6b81",
-"icons":[
-{
-"src":"icon.png",
-"sizes":"192x192",
-"type":"image/png"
-}
-]
+  "name": "Relationship Tracker",
+  "short_name": "LoveTracker",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fdf2f4",
+  "theme_color": "#e8526a",
+  "icons": [
+    {
+      "src": "icon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
