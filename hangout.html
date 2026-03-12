@@ -18,9 +18,9 @@
   --plum: #7c3a6e;
   --sky: #4a8fb5;
   --green: #4a9e6f;
+  --green-pale: #edfaf3;
   --text: #2e1820;
   --text-muted: #a0788a;
-  --white: #ffffff;
   --shadow: 0 6px 28px rgba(232,82,106,0.10);
   --shadow-lg: 0 12px 48px rgba(232,82,106,0.15);
   --radius: 16px;
@@ -73,7 +73,6 @@ header { text-align: center; margin-bottom: 24px; }
   transition: background 0.2s;
   margin-bottom: 20px;
 }
-
 .back-btn:hover { background: var(--rose-hover); }
 
 .card {
@@ -96,7 +95,6 @@ header { text-align: center; margin-bottom: 24px; }
   margin-bottom: 14px;
 }
 
-/* ---- TABS ---- */
 .tabs {
   display: flex;
   gap: 8px;
@@ -126,41 +124,56 @@ header { text-align: center; margin-bottom: 24px; }
   box-shadow: 0 4px 14px rgba(232,82,106,0.3);
 }
 
-.tab:hover:not(.active) {
-  background: var(--rose-hover);
-  border-color: var(--rose-light);
-}
+.tab:hover:not(.active) { background: var(--rose-hover); border-color: var(--rose-light); }
 
-/* ---- QUESTION CARD ---- */
-.question-box {
-  background: linear-gradient(135deg, #fff5f7, #ffedf0);
-  border: 1.5px solid var(--rose-mid);
-  border-radius: 14px;
-  padding: 24px;
+/* ---- PROGRESS ---- */
+.progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
+  gap: 12px;
 }
 
-.question-box::before {
-  content: '"';
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 8rem;
-  color: rgba(232,82,106,0.08);
-  position: absolute;
-  top: -20px;
-  left: 8px;
-  line-height: 1;
-  pointer-events: none;
+.progress-dots { display: flex; gap: 8px; }
+
+.progress-dot {
+  width: 32px;
+  height: 6px;
+  border-radius: 3px;
+  background: #f0d8dc;
+  transition: background 0.3s;
 }
 
-.question-text {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.35rem;
+.progress-dot.answered { background: var(--green); }
+.progress-dot.active   { background: var(--rose); }
+.progress-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+
+/* ---- DATE BADGE ---- */
+.date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(232,82,106,0.08);
+  color: var(--rose);
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--text);
-  line-height: 1.5;
-  position: relative;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+/* ---- QUESTION ---- */
+.question-block { margin-bottom: 20px; }
+
+.q-number {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
 }
 
 .question-category {
@@ -171,22 +184,46 @@ header { text-align: center; margin-bottom: 24px; }
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .cat-relationship { background: rgba(232,82,106,0.1); color: var(--rose); }
 .cat-hypothetical { background: rgba(124,58,110,0.1); color: var(--plum); }
-.cat-future { background: rgba(74,143,181,0.1); color: var(--sky); }
-.cat-deep { background: rgba(74,158,111,0.1); color: var(--green); }
+.cat-future       { background: rgba(74,143,181,0.1);  color: var(--sky); }
+.cat-deep         { background: rgba(74,158,111,0.1);  color: var(--green); }
 
-/* ---- ANSWER AREA ---- */
-.answer-area {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
+.question-box {
+  background: linear-gradient(135deg, #fff5f7, #ffedf0);
+  border: 1.5px solid var(--rose-mid);
+  border-radius: 14px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 14px;
 }
 
+.question-box::before {
+  content: '"';
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 7rem;
+  color: rgba(232,82,106,0.07);
+  position: absolute;
+  top: -18px;
+  left: 8px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.question-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.55;
+  position: relative;
+}
+
+/* ---- TEXTAREA ---- */
 textarea {
   width: 100%;
   padding: 14px 16px;
@@ -198,20 +235,26 @@ textarea {
   background: #fff8f9;
   outline: none;
   resize: vertical;
-  min-height: 90px;
+  min-height: 85px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-textarea:focus {
-  border-color: var(--rose-light);
-  box-shadow: 0 0 0 3px rgba(232,82,106,0.08);
-}
+textarea:focus { border-color: var(--rose-light); box-shadow: 0 0 0 3px rgba(232,82,106,0.08); }
+textarea.locked { background: #f5f0f2; color: var(--text-muted); cursor: default; font-style: italic; pointer-events: none; }
 
-textarea.locked {
-  background: #f8f0f2;
-  color: var(--text-muted);
-  cursor: not-allowed;
-  font-style: italic;
+.answered-badge {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--green-pale);
+  border: 1.5px solid var(--green);
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 8px;
+  width: fit-content;
 }
 
 /* ---- BUTTONS ---- */
@@ -229,146 +272,69 @@ button {
   box-shadow: 0 2px 10px rgba(232,82,106,0.2);
 }
 
-button:hover {
-  background: var(--rose);
-  transform: translateY(-1px);
-  box-shadow: 0 5px 16px rgba(232,82,106,0.3);
-}
-
+button:hover { background: var(--rose); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(232,82,106,0.3); }
 button:active { transform: translateY(0); }
+button:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
 
-.btn-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 6px;
-}
-
-.btn-submit {
-  background: linear-gradient(135deg, var(--rose-light), var(--rose));
-  font-weight: 600;
-  padding: 12px 30px;
-}
-
-.btn-new {
+.btn-ghost {
   background: rgba(255,255,255,0.9);
   color: var(--rose);
   border: 1.5px solid var(--rose-mid);
   box-shadow: none;
 }
-.btn-new:hover { background: var(--rose-hover); color: var(--rose); }
+.btn-ghost:hover { background: var(--rose-hover); color: var(--rose); }
+
+.btn-lock {
+  background: linear-gradient(135deg, var(--rose-light), var(--rose));
+  font-weight: 600;
+  padding: 12px 30px;
+  box-shadow: 0 4px 16px rgba(232,82,106,0.25);
+}
 
 .btn-reveal {
   background: linear-gradient(135deg, var(--plum), #9b4d8a);
   font-weight: 600;
-  padding: 12px 30px;
+  padding: 12px 34px;
+  font-size: 0.95rem;
   box-shadow: 0 4px 16px rgba(124,58,110,0.3);
 }
 
-.btn-reveal:hover {
-  background: linear-gradient(135deg, #6e3060, var(--plum));
-  box-shadow: 0 6px 20px rgba(124,58,110,0.4);
-}
+.btn-reveal:hover { background: linear-gradient(135deg, #6e3060, var(--plum)); }
 
-/* ---- STATUS PANEL ---- */
-.status-panel {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 16px;
-}
+/* ---- STATUS CHIPS ---- */
+.status-panel { display: flex; gap: 10px; margin-bottom: 20px; }
 
-.person-status {
+.person-chip {
   flex: 1;
-  max-width: 200px;
-  padding: 12px;
+  padding: 10px 14px;
   border-radius: 12px;
-  text-align: center;
   border: 1.5px solid #f0d0d8;
   background: #fff8f9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   transition: all 0.3s;
 }
 
-.person-status.answered {
-  background: linear-gradient(135deg, rgba(74,158,111,0.1), rgba(74,158,111,0.05));
-  border-color: var(--green);
-}
+.person-chip.done { background: var(--green-pale); border-color: var(--green); }
+.chip-icon { font-size: 1rem; }
+.chip-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+.chip-count { font-size: 0.7rem; color: var(--text-muted); margin-left: auto; }
 
-.person-status .status-name {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.person-status .status-icon {
-  font-size: 1.3rem;
-}
-
-/* ---- REVEAL CARDS ---- */
-.reveal-container {
-  display: none;
-  gap: 16px;
-  flex-direction: column;
-  margin-top: 20px;
-  animation: fadeSlide 0.5s ease;
-}
-
-.reveal-container.visible {
-  display: flex;
-}
-
-@keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.reveal-card {
-  border-radius: 14px;
-  padding: 20px;
-  border: 1.5px solid;
-}
-
-.reveal-card.card-a {
-  background: linear-gradient(135deg, #fff5f7, #ffe8ec);
-  border-color: var(--rose-mid);
-}
-
-.reveal-card.card-b {
-  background: linear-gradient(135deg, #f5f0ff, #ede0f7);
-  border-color: #d4b0e0;
-}
-
-.reveal-name {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-
-.reveal-answer {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.15rem;
-  line-height: 1.6;
-  color: var(--text);
-}
-
-/* ---- WAITING NOTICE ---- */
-.waiting-notice {
+/* ---- WAITING ---- */
+.waiting-box {
   text-align: center;
-  padding: 20px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+  padding: 28px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff5f7, #ffedf0);
+  border: 1.5px solid var(--rose-mid);
+  margin-bottom: 16px;
 }
+
+.waiting-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--text); margin-bottom: 8px; }
+.waiting-sub { font-size: 0.82rem; color: var(--text-muted); }
 
 .waiting-dots::after {
   content: '';
@@ -377,76 +343,58 @@ button:disabled {
 
 @keyframes dots {
   0%,20% { content: '.'; }
-  40% { content: '..'; }
-  60%,100% { content: '...'; }
+  40%     { content: '..'; }
+  60%,100%{ content: '...'; }
 }
+
+/* ---- REVEAL ---- */
+.reveal-question-block {
+  margin-bottom: 24px;
+  animation: fadeSlide 0.4s ease both;
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reveal-q-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.reveal-question-text { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
+
+.reveal-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.reveal-card { border-radius: 12px; padding: 14px 16px; border: 1.5px solid; }
+.reveal-card.card-a { background: linear-gradient(135deg, #fff5f7, #ffe8ec); border-color: var(--rose-mid); }
+.reveal-card.card-b { background: linear-gradient(135deg, #f5f0ff, #ede0f7); border-color: #d4b0e0; }
+
+.reveal-name { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.reveal-answer-text { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; line-height: 1.55; color: var(--text); }
+
+.reveal-divider { height: 1px; background: linear-gradient(to right, transparent, #f0d0d8, transparent); margin: 20px 0; }
 
 /* ---- HISTORY ---- */
-.history-item {
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid #f0d8dc;
-  background: #fff8f9;
-  margin-bottom: 10px;
-}
-
-.history-question {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-}
-
-.history-answers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.history-answer {
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
+.history-item { border-radius: 12px; padding: 16px; border: 1px solid #f0d8dc; background: #fff8f9; margin-bottom: 12px; }
+.history-date { font-size: 0.68rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+.history-q-block { margin-bottom: 14px; }
+.history-q-text { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px; }
+.history-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.history-answer { border-radius: 10px; padding: 10px 12px; font-size: 0.82rem; line-height: 1.4; }
 .history-answer.a-side { background: #fff0f3; }
 .history-answer.b-side { background: #f5f0ff; }
+.h-name { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: var(--text-muted); }
 
-.h-name {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-  color: var(--text-muted);
-}
+.divider { height: 1px; background: linear-gradient(to right, transparent, #f0d0d8, transparent); margin: 16px 0; }
 
-/* ---- DIVIDER ---- */
-.divider {
-  height: 1px;
-  background: linear-gradient(to right, transparent, #f0d0d8, transparent);
-  margin: 4px 0 16px;
-}
+.empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 0.9rem; }
+.empty-icon { font-size: 2rem; margin-bottom: 10px; }
 
-/* ---- SETUP INLINE ---- */
-#setupNotice {
-  text-align: center;
-  padding: 30px 20px;
-  color: var(--text-muted);
-  font-size: 0.92rem;
-}
+#setupNotice { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 0.92rem; }
+#setupNotice a { color: var(--rose); font-weight: 600; }
 
-#setupNotice a {
-  color: var(--rose);
-  font-weight: 600;
-}
-
-/* ---- RESPONSIVE ---- */
 @media (max-width: 520px) {
+  .reveal-answers  { grid-template-columns: 1fr; }
   .history-answers { grid-template-columns: 1fr; }
-  .status-panel { flex-direction: column; align-items: center; }
-  .person-status { max-width: 100%; width: 100%; }
+  .status-panel    { flex-direction: column; }
 }
 
 </style>
@@ -459,139 +407,201 @@ button:disabled {
 
 <header>
   <h1>🫶 Hang Out</h1>
-  <p class="subtitle">Questions & scenarios for two — answers revealed together</p>
+  <p class="subtitle">3 questions a day — answer separately, reveal together</p>
 </header>
 
 <div id="setupNotice" class="card" style="display:none;">
-  <p>You need to set up your profile first.<br><a href="index.html">← Go back to set up</a></p>
+  <div class="empty-icon">💌</div>
+  <p>You need to set up your profile first.<br><a href="./index.html">← Go back to set up</a></p>
 </div>
 
 <div id="appContent" style="display:none;">
 
-  <!-- Tabs -->
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('questions')">💬 Questions</div>
-    <div class="tab" onclick="switchTab('scenarios')">🎲 Scenarios</div>
-    <div class="tab" onclick="switchTab('history')">📖 History</div>
+    <div class="tab active" id="tabQuestions" onclick="switchTab('questions')">💬 Today</div>
+    <div class="tab" id="tabScenarios" onclick="switchTab('scenarios')">🎲 Scenarios</div>
+    <div class="tab" id="tabHistory"   onclick="switchTab('history')">📖 History</div>
   </div>
 
-  <!-- Questions Tab -->
-  <div id="tab-questions" class="tab-content">
-    <div class="card">
-      <div id="qCategoryBadge" class="question-category cat-relationship">Relationship</div>
-      <div class="question-box">
-        <div id="questionText" class="question-text">Loading question...</div>
+  <!-- ===== QUESTIONS TAB ===== -->
+  <div id="tab-questions">
+    <div id="qLoading" class="card" style="text-align:center; padding:40px; color:var(--text-muted);">
+      Loading today's questions<span class="waiting-dots"></span>
+    </div>
+
+    <div id="qAnswering" style="display:none;">
+      <div class="card" id="qMainCard">
+        <div class="date-badge">📅 <span id="qDateLabel"></span></div>
+
+        <div class="status-panel">
+          <div class="person-chip" id="qChipA">
+            <span class="chip-icon">⏳</span>
+            <span class="chip-name" id="qChipNameA">Person A</span>
+            <span class="chip-count" id="qChipCountA">0/3</span>
+          </div>
+          <div class="person-chip" id="qChipB">
+            <span class="chip-icon">⏳</span>
+            <span class="chip-name" id="qChipNameB">Person B</span>
+            <span class="chip-count" id="qChipCountB">0/3</span>
+          </div>
+        </div>
+
+        <div class="progress-row">
+          <div class="progress-dots">
+            <div class="progress-dot" id="qDot0"></div>
+            <div class="progress-dot" id="qDot1"></div>
+            <div class="progress-dot" id="qDot2"></div>
+          </div>
+          <div class="progress-label" id="qProgressLabel">Question 1 of 3</div>
+        </div>
+
+        <div id="qBlock0" class="question-block">
+          <div class="q-number">Question 1</div>
+          <div class="question-category" id="qCat0"></div>
+          <div class="question-box"><div class="question-text" id="qText0"></div></div>
+          <textarea id="qAns0" placeholder="Your answer — your partner won't see it until both have answered all 3..."></textarea>
+          <div class="answered-badge" id="qBadge0">✅ Locked in</div>
+        </div>
+
+        <div id="qBlock1" class="question-block" style="display:none;">
+          <div class="q-number">Question 2</div>
+          <div class="question-category" id="qCat1"></div>
+          <div class="question-box"><div class="question-text" id="qText1"></div></div>
+          <textarea id="qAns1" placeholder="Your answer..."></textarea>
+          <div class="answered-badge" id="qBadge1">✅ Locked in</div>
+        </div>
+
+        <div id="qBlock2" class="question-block" style="display:none;">
+          <div class="q-number">Question 3</div>
+          <div class="question-category" id="qCat2"></div>
+          <div class="question-box"><div class="question-text" id="qText2"></div></div>
+          <textarea id="qAns2" placeholder="Your answer..."></textarea>
+          <div class="answered-badge" id="qBadge2">✅ Locked in</div>
+        </div>
+
+        <div class="btn-row" id="qNavRow">
+          <button class="btn-ghost" id="qPrevBtn" onclick="navigate('questions',-1)" disabled>← Prev</button>
+          <button class="btn-lock"  id="qLockBtn" onclick="lockCurrent('questions')">Lock In ✓</button>
+          <button class="btn-ghost" id="qNextBtn" onclick="navigate('questions', 1)" disabled>Next →</button>
+        </div>
       </div>
 
-      <!-- Status panel -->
-      <div class="status-panel">
-        <div class="person-status" id="statusA">
-          <div class="status-icon">⏳</div>
-          <div class="status-name" id="statusNameA">Person A</div>
+      <div id="qWaitingCard" class="card" style="display:none;">
+        <div class="waiting-box">
+          <div class="waiting-title">All 3 answers locked in 🔒</div>
+          <div class="waiting-sub">
+            Waiting for your partner to finish<span class="waiting-dots"></span><br>
+            <span style="font-size:0.75rem; margin-top:6px; display:block;">Reveal activates when both of you are done.</span>
+          </div>
         </div>
-        <div class="person-status" id="statusB">
-          <div class="status-icon">⏳</div>
-          <div class="status-name" id="statusNameB">Person B</div>
-        </div>
-      </div>
-
-      <!-- Answer area -->
-      <div id="answerPhase" class="answer-area">
-        <textarea id="myAnswer" placeholder="Your answer (only you can see this until both have answered)..."></textarea>
         <div class="btn-row">
-          <button class="btn-new" onclick="newQuestion('questions')">🔀 New Question</button>
-          <button class="btn-submit" id="submitBtn" onclick="submitAnswer('questions')">Lock In Answer ✓</button>
+          <button class="btn-reveal" id="qRevealBtn" onclick="doReveal('questions')" disabled>Reveal All Answers ✨</button>
         </div>
       </div>
+    </div>
 
-      <!-- Waiting state -->
-      <div id="waitingPhase" style="display:none;">
-        <div class="waiting-notice">
-          Your answer is locked in 🔒<br>
-          <span style="font-size:0.82rem;">Waiting for your partner<span class="waiting-dots"></span></span>
-        </div>
-        <div class="btn-row">
-          <button class="btn-reveal" id="revealBtn" onclick="revealAnswers('questions')" disabled>Reveal Both Answers</button>
-        </div>
-      </div>
-
-      <!-- Reveal area -->
-      <div id="revealPhase" class="reveal-container">
-        <div class="reveal-card card-a">
-          <div class="reveal-name" id="revealNameA">Person A</div>
-          <div class="reveal-answer" id="revealAnswerA">—</div>
-        </div>
-        <div class="reveal-card card-b">
-          <div class="reveal-name" id="revealNameB">Person B</div>
-          <div class="reveal-answer" id="revealAnswerB">—</div>
-        </div>
-        <div class="btn-row">
-          <button class="btn-new" onclick="newQuestion('questions')">Next Question →</button>
-        </div>
+    <div id="qRevealed" style="display:none;">
+      <div class="card">
+        <div class="date-badge">📅 <span id="qRevealDate"></span></div>
+        <div class="section-label" style="margin-bottom:16px;">Today's Answers Revealed 💫</div>
+        <div id="qRevealContent"></div>
+        <p style="text-align:center; font-size:0.78rem; color:var(--text-muted); margin-top:16px;">Come back tomorrow for 3 new questions 💌</p>
       </div>
     </div>
   </div>
 
-  <!-- Scenarios Tab -->
-  <div id="tab-scenarios" class="tab-content" style="display:none;">
-    <div class="card">
-      <div id="sCategoryBadge" class="question-category cat-hypothetical">Hypothetical</div>
-      <div class="question-box">
-        <div id="scenarioText" class="question-text">Loading scenario...</div>
+  <!-- ===== SCENARIOS TAB ===== -->
+  <div id="tab-scenarios" style="display:none;">
+    <div id="sLoading" class="card" style="text-align:center; padding:40px; color:var(--text-muted);">
+      Loading today's scenarios<span class="waiting-dots"></span>
+    </div>
+
+    <div id="sAnswering" style="display:none;">
+      <div class="card" id="sMainCard">
+        <div class="date-badge">📅 <span id="sDateLabel"></span></div>
+
+        <div class="status-panel">
+          <div class="person-chip" id="sChipA">
+            <span class="chip-icon">⏳</span>
+            <span class="chip-name" id="sChipNameA">Person A</span>
+            <span class="chip-count" id="sChipCountA">0/3</span>
+          </div>
+          <div class="person-chip" id="sChipB">
+            <span class="chip-icon">⏳</span>
+            <span class="chip-name" id="sChipNameB">Person B</span>
+            <span class="chip-count" id="sChipCountB">0/3</span>
+          </div>
+        </div>
+
+        <div class="progress-row">
+          <div class="progress-dots">
+            <div class="progress-dot" id="sDot0"></div>
+            <div class="progress-dot" id="sDot1"></div>
+            <div class="progress-dot" id="sDot2"></div>
+          </div>
+          <div class="progress-label" id="sProgressLabel">Scenario 1 of 3</div>
+        </div>
+
+        <div id="sBlock0" class="question-block">
+          <div class="q-number">Scenario 1</div>
+          <div class="question-category" id="sCat0"></div>
+          <div class="question-box"><div class="question-text" id="sText0"></div></div>
+          <textarea id="sAns0" placeholder="What would you do..."></textarea>
+          <div class="answered-badge" id="sBadge0">✅ Locked in</div>
+        </div>
+
+        <div id="sBlock1" class="question-block" style="display:none;">
+          <div class="q-number">Scenario 2</div>
+          <div class="question-category" id="sCat1"></div>
+          <div class="question-box"><div class="question-text" id="sText1"></div></div>
+          <textarea id="sAns1" placeholder="What would you do..."></textarea>
+          <div class="answered-badge" id="sBadge1">✅ Locked in</div>
+        </div>
+
+        <div id="sBlock2" class="question-block" style="display:none;">
+          <div class="q-number">Scenario 3</div>
+          <div class="question-category" id="sCat2"></div>
+          <div class="question-box"><div class="question-text" id="sText2"></div></div>
+          <textarea id="sAns2" placeholder="What would you do..."></textarea>
+          <div class="answered-badge" id="sBadge2">✅ Locked in</div>
+        </div>
+
+        <div class="btn-row" id="sNavRow">
+          <button class="btn-ghost" id="sPrevBtn" onclick="navigate('scenarios',-1)" disabled>← Prev</button>
+          <button class="btn-lock"  id="sLockBtn" onclick="lockCurrent('scenarios')">Lock In ✓</button>
+          <button class="btn-ghost" id="sNextBtn" onclick="navigate('scenarios', 1)" disabled>Next →</button>
+        </div>
       </div>
 
-      <div class="status-panel">
-        <div class="person-status" id="sStatusA">
-          <div class="status-icon">⏳</div>
-          <div class="status-name" id="sStatusNameA">Person A</div>
+      <div id="sWaitingCard" class="card" style="display:none;">
+        <div class="waiting-box">
+          <div class="waiting-title">All 3 answers locked in 🔒</div>
+          <div class="waiting-sub">Waiting for your partner to finish<span class="waiting-dots"></span></div>
         </div>
-        <div class="person-status" id="sStatusB">
-          <div class="status-icon">⏳</div>
-          <div class="status-name" id="sStatusNameB">Person B</div>
-        </div>
-      </div>
-
-      <div id="sAnswerPhase" class="answer-area">
-        <textarea id="sMyAnswer" placeholder="What would you do? (locked until your partner also answers)..."></textarea>
         <div class="btn-row">
-          <button class="btn-new" onclick="newQuestion('scenarios')">🔀 New Scenario</button>
-          <button class="btn-submit" id="sSubmitBtn" onclick="submitAnswer('scenarios')">Lock In Answer ✓</button>
+          <button class="btn-reveal" id="sRevealBtn" onclick="doReveal('scenarios')" disabled>Reveal All Answers ✨</button>
         </div>
       </div>
+    </div>
 
-      <div id="sWaitingPhase" style="display:none;">
-        <div class="waiting-notice">
-          Your answer is locked in 🔒<br>
-          <span style="font-size:0.82rem;">Waiting for your partner<span class="waiting-dots"></span></span>
-        </div>
-        <div class="btn-row">
-          <button class="btn-reveal" id="sRevealBtn" onclick="revealAnswers('scenarios')" disabled>Reveal Both Answers</button>
-        </div>
-      </div>
-
-      <div id="sRevealPhase" class="reveal-container">
-        <div class="reveal-card card-a">
-          <div class="reveal-name" id="sRevealNameA">Person A</div>
-          <div class="reveal-answer" id="sRevealAnswerA">—</div>
-        </div>
-        <div class="reveal-card card-b">
-          <div class="reveal-name" id="sRevealNameB">Person B</div>
-          <div class="reveal-answer" id="sRevealAnswerB">—</div>
-        </div>
-        <div class="btn-row">
-          <button class="btn-new" onclick="newQuestion('scenarios')">Next Scenario →</button>
-        </div>
+    <div id="sRevealed" style="display:none;">
+      <div class="card">
+        <div class="date-badge">📅 <span id="sRevealDate"></span></div>
+        <div class="section-label" style="margin-bottom:16px;">Today's Scenarios Revealed 💫</div>
+        <div id="sRevealContent"></div>
+        <p style="text-align:center; font-size:0.78rem; color:var(--text-muted); margin-top:16px;">Come back tomorrow for 3 new scenarios 💌</p>
       </div>
     </div>
   </div>
 
-  <!-- History Tab -->
-  <div id="tab-history" class="tab-content" style="display:none;">
+  <!-- ===== HISTORY TAB ===== -->
+  <div id="tab-history" style="display:none;">
     <div class="card">
-      <div class="section-label">Past Answers</div>
+      <div class="section-label">Past Revealed Sessions</div>
       <div id="historyList">
-        <div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">
-          No revealed answers yet — complete some questions first!
+        <div class="empty-state">
+          <div class="empty-icon">📖</div>
+          No revealed answers yet — complete today's questions first!
         </div>
       </div>
     </div>
@@ -601,7 +611,9 @@ button:disabled {
 
 <script>
 
-/* ---- DATA ---- */
+/* ================================================================
+   QUESTION & SCENARIO DATA
+================================================================ */
 
 const QUESTIONS = {
   relationship: [
@@ -611,7 +623,6 @@ const QUESTIONS = {
     "What's something you've never told me but want me to know?",
     "How do you feel about where we are in our relationship right now?",
     "What's one habit of mine you secretly find adorable?",
-    "What's a dream you've had about our future together?",
     "What does a perfect day with me look like to you?",
     "What's something you're nervous to bring up but want to talk about?",
     "When do you feel most connected to me, even from a distance?",
@@ -629,7 +640,7 @@ const QUESTIONS = {
     "If you could change one thing about how we communicate, what would it be?",
     "What's a version of yourself you're still working toward?",
     "What belief about love did you have before us that we've changed?",
-    "What's the hardest part of missing me — what do you miss most?",
+    "What's the hardest part of missing me?",
     "If everything stayed exactly as it is now for 5 more years, how would you feel?",
     "What's something you need from a relationship that you've never asked for?"
   ],
@@ -649,316 +660,677 @@ const QUESTIONS = {
 
 const SCENARIOS = [
   { text: "You find out your partner turned down their dream job to be closer to you — without telling you. What do you do?", cat: "hypothetical" },
-  { text: "You both win an all-expenses trip but to completely opposite places you've always wanted to go — and you have to choose one. Which wins?", cat: "hypothetical" },
-  { text: "You're stranded in an airport for 24 hours. What do you do to pass the time?", cat: "hypothetical" },
+  { text: "You both win an all-expenses trip but to completely opposite places — you have to choose one. Which wins?", cat: "hypothetical" },
+  { text: "You're stranded in an airport for 24 hours with no wifi. What do you do?", cat: "hypothetical" },
   { text: "One of you gets a huge opportunity that means long distance for another 2 years. How do you handle it?", cat: "hypothetical" },
-  { text: "You accidentally see your partner's messages open on their phone. You notice something odd — what do you do?", cat: "deep" },
-  { text: "You could press a button to skip the distance phase and teleport to being already living together — but you lose the memories of this long distance era. Do you press it?", cat: "hypothetical" },
-  { text: "You're at a party and someone is clearly flirting with you — your partner isn't there. How do you handle it and do you tell them later?", cat: "hypothetical" },
-  { text: "Your partner's friends don't like you. They haven't said it, but you can feel it. How do you approach it?", cat: "deep" },
-  { text: "You could read your partner's honest inner thoughts for one full day, but they'd also read yours. Would you do it?", cat: "hypothetical" },
-  { text: "You both get into arguments differently — one of you shuts down, one wants to talk it out. How do you find a middle ground?", cat: "deep" },
-  { text: "An ex of yours reaches out saying they want to reconnect as friends. What do you do and how do you tell your partner?", cat: "hypothetical" },
-  { text: "You could only communicate for 10 minutes a day for one month. How would you make those 10 minutes count?", cat: "hypothetical" },
-  { text: "You've planned a visit for months but something major comes up and you have to cancel. How do you handle the fallout?", cat: "deep" },
-  { text: "Your partner tells you they want to slow things down — no break-up, just less intensity. What's your first reaction?", cat: "deep" },
-  { text: "You both wake up tomorrow in the same city — permanently. What's the very first thing you do?", cat: "hypothetical" }
+  { text: "You accidentally see your partner's messages open on their phone and notice something odd. What do you do?", cat: "deep" },
+  { text: "You could skip the distance phase and teleport to living together — but lose all memories of this era. Do you press the button?", cat: "hypothetical" },
+  { text: "You're at a party, someone is clearly flirting with you, your partner isn't there. What do you do, and do you tell them?", cat: "hypothetical" },
+  { text: "Your partner's friends don't like you. They haven't said it but you can feel it. How do you approach it?", cat: "deep" },
+  { text: "You could read your partner's honest inner thoughts for one full day, but they'd read yours too. Would you do it?", cat: "hypothetical" },
+  { text: "You argue differently — one shuts down, one wants to talk it out. How do you find middle ground?", cat: "deep" },
+  { text: "An ex reaches out wanting to reconnect as friends. What do you do and how do you tell your partner?", cat: "hypothetical" },
+  { text: "You could only communicate 10 minutes a day for one month. How do you make those 10 minutes count?", cat: "hypothetical" },
+  { text: "You've planned a visit for months but something major comes up and you have to cancel. How do you handle it?", cat: "deep" },
+  { text: "Your partner says they want to slow things down — no break-up, just less intensity. What's your first reaction?", cat: "deep" },
+  { text: "You both wake up tomorrow in the same city — permanently. What's the very first thing you do?", cat: "hypothetical" },
+  { text: "If you could give your past self one piece of advice about this relationship, what would it be?", cat: "deep" },
+  { text: "A close friend of yours has a crush on your partner. How do you handle it?", cat: "hypothetical" },
+  { text: "If your relationship was a movie, what genre would it be and what's the title?", cat: "hypothetical" }
 ]
 
-const CAT_CLASSES = {
-  relationship: "cat-relationship",
-  deep: "cat-deep",
-  future: "cat-future",
-  hypothetical: "cat-hypothetical"
-}
+const CAT_CLASSES = { relationship:"cat-relationship", deep:"cat-deep", future:"cat-future", hypothetical:"cat-hypothetical" }
+const CAT_LABELS  = { relationship:"Relationship", deep:"Deep", future:"Future", hypothetical:"Hypothetical" }
 
-const CAT_LABELS = {
-  relationship: "Relationship",
-  deep: "Deep",
-  future: "Future",
-  hypothetical: "Hypothetical"
-}
-
-/* ---- STATE ---- */
+/* ================================================================
+   GLOBAL STATE
+================================================================ */
 
 let user = "", couple = "", nameA = "", nameB = ""
-let currentQuestion = { questions: null, scenarios: null }
 let history = []
-let activeTab = "questions"
 
-/* ---- INIT ---- */
+// Per-type runtime state (not persisted — rebuilt from Firestore session)
+const ST = {
+  questions: { session: null, currentIdx: 0, lockedIdx: [], drafts: ["","",""] },
+  scenarios: { session: null, currentIdx: 0, lockedIdx: [], drafts: ["","",""] }
+}
+
+/* ================================================================
+   UTILITIES
+================================================================ */
+
+function getToday() {
+  let d = new Date()
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate()
+}
+
+function fmtDate(str) {
+  if (!str) return ""
+  let [y,m,d] = str.split("-")
+  return new Date(y, m-1, d).toLocaleDateString("default", { weekday:"long", month:"long", day:"numeric" })
+}
+
+function p(type) { return type === "questions" ? "q" : "s" }
+
+function elShow(id) { let e = document.getElementById(id); if(e) e.style.display = "block" }
+function elHide(id) { let e = document.getElementById(id); if(e) e.style.display = "none"  }
+
+function sessionKey(type) {
+  return couple + "_" + (type === "questions" ? "q" : "s") + "_" + getToday()
+}
+
+function pickThreeQuestions() {
+  // One from each category — guaranteed variety
+  return ["relationship","deep","future"].map(cat => {
+    let pool = QUESTIONS[cat]
+    return { text: pool[Math.floor(Math.random() * pool.length)], cat }
+  }).sort(() => Math.random() - 0.5)  // shuffle order
+}
+
+function pickThreeScenarios() {
+  let pool = [...SCENARIOS]
+  let result = []
+  while (result.length < 3) {
+    result.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0])
+  }
+  return result
+}
+
+/* ================================================================
+   INIT
+================================================================ */
 
 window.addEventListener("load", () => {
   let saved = localStorage.getItem("rdTracker_lastSession")
-  if (!saved) {
-    document.getElementById("setupNotice").style.display = "block"
-    return
-  }
+  if (!saved) { elShow("setupNotice"); return }
+
   try {
     let s = JSON.parse(saved)
-    user = s.user || ""
+    user   = s.user       || ""
     couple = s.coupleCode || "default"
-    nameA = s.nameA || "Person A"
-    nameB = s.nameB || "Person B"
-    if (!user) { document.getElementById("setupNotice").style.display = "block"; return }
-  } catch(e) {
-    document.getElementById("setupNotice").style.display = "block"; return
-  }
+    nameA  = s.nameA      || "Person A"
+    nameB  = s.nameB      || "Person B"
+    if (!user) { elShow("setupNotice"); return }
+  } catch(e) { elShow("setupNotice"); return }
 
-  document.getElementById("appContent").style.display = "block"
+  elShow("appContent")
 
-  // Load history
-  let h = localStorage.getItem("hangout_history_" + couple)
-  if (h) { try { history = JSON.parse(h) } catch(e) {} }
+  // Set all name labels
+  ;["q","s"].forEach(px => {
+    document.getElementById(px+"ChipNameA").innerText = nameA
+    document.getElementById(px+"ChipNameB").innerText = nameB
+  })
 
-  // Set names in status
-  document.getElementById("statusNameA").innerText = nameA
-  document.getElementById("statusNameB").innerText = nameB
-  document.getElementById("sStatusNameA").innerText = nameA
-  document.getElementById("sStatusNameB").innerText = nameB
+  // Load history from localStorage
+  try { history = JSON.parse(localStorage.getItem("hangout_history_"+couple) || "[]") } catch(e) {}
 
-  newQuestion("questions")
-  newQuestion("scenarios")
-  listenFirebase()
-  renderHistory()
+  // Load both session types
+  loadSession("questions")
+  loadSession("scenarios")
 })
 
-/* ---- TABS ---- */
+/* ================================================================
+   LOAD SESSION — core logic
+   Only Person A creates the day's questions.
+   Person B reads from Firestore (with retry if A hasn't opened yet).
+================================================================ */
 
-function switchTab(tab) {
-  activeTab = tab
-  document.querySelectorAll(".tab").forEach((t, i) => {
-    t.classList.toggle("active", ["questions","scenarios","history"][i] === tab)
-  })
-  document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none")
-  document.getElementById("tab-" + tab).style.display = "block"
+async function loadSession(type) {
+  let px = p(type)
+  elShow(px+"Loading")
+  elHide(px+"Answering")
+  elHide(px+"Revealed")
 
-  if (tab === "history") renderHistory()
-}
+  // Try localStorage cache first (fast load on revisit)
+  let cacheKey = "hangout_session_" + couple + "_" + type + "_" + getToday()
+  let cached = null
+  try { cached = JSON.parse(localStorage.getItem(cacheKey) || "null") } catch(e) {}
 
-/* ---- QUESTION GENERATION ---- */
-
-function newQuestion(type) {
-  // Clear local answers for this round
-  localStorage.removeItem("hangout_myanswer_" + couple + "_" + type)
-
-  if (type === "questions") {
-    let allKeys = ["relationship","deep","future"]
-    let cat = allKeys[Math.floor(Math.random() * allKeys.length)]
-    let pool = QUESTIONS[cat]
-    let q = pool[Math.floor(Math.random() * pool.length)]
-    currentQuestion.questions = { text: q, cat }
-    document.getElementById("questionText").innerText = q
-    let badge = document.getElementById("qCategoryBadge")
-    badge.className = "question-category " + CAT_CLASSES[cat]
-    badge.innerText = CAT_LABELS[cat]
-    document.getElementById("myAnswer").value = ""
-    document.getElementById("myAnswer").disabled = false
-    document.getElementById("myAnswer").classList.remove("locked")
-    resetPhase("questions")
-    if (window.db) {
-      window.setDoc(window.doc(window.db, "hangout", couple + "_q"), {
-        question: q, cat, answerA: null, answerB: null, timestamp: Date.now()
-      }).catch(() => {})
+  if (!window.db) {
+    // Fully offline mode
+    if (cached) { ST[type].session = cached; renderSession(type); return }
+    if (user === "A") {
+      let newSess = buildNewSession(type)
+      localStorage.setItem(cacheKey, JSON.stringify(newSess))
+      ST[type].session = newSess
+    } else {
+      showWaitForPartner(type)
     }
-  } else {
-    let s = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]
-    currentQuestion.scenarios = s
-    document.getElementById("scenarioText").innerText = s.text
-    let badge = document.getElementById("sCategoryBadge")
-    badge.className = "question-category " + CAT_CLASSES[s.cat]
-    badge.innerText = CAT_LABELS[s.cat]
-    document.getElementById("sMyAnswer").value = ""
-    document.getElementById("sMyAnswer").disabled = false
-    document.getElementById("sMyAnswer").classList.remove("locked")
-    resetPhase("scenarios")
-    if (window.db) {
-      window.setDoc(window.doc(window.db, "hangout", couple + "_s"), {
-        question: s.text, cat: s.cat, answerA: null, answerB: null, timestamp: Date.now()
-      }).catch(() => {})
-    }
+    renderSession(type)
+    return
   }
 
-  updateStatusPanels(type, false, false)
+  try {
+    let ref  = window.doc(window.db, "hangout", sessionKey(type))
+    let snap = await window.getDoc(ref)
+
+    if (snap.exists()) {
+      ST[type].session = snap.data()
+      localStorage.setItem(cacheKey, JSON.stringify(ST[type].session))
+      renderSession(type)
+      listenSession(type)
+      return
+    }
+
+    // No session yet for today
+    if (user === "A") {
+      // Person A creates it
+      let newSess = buildNewSession(type)
+      await window.setDoc(ref, newSess)
+      ST[type].session = newSess
+      localStorage.setItem(cacheKey, JSON.stringify(newSess))
+      renderSession(type)
+      listenSession(type)
+    } else {
+      // Person B waits — poll up to 5 times (2s apart = 10s total)
+      elHide(px+"Loading")
+      showWaitForPartner(type)
+      let found = false
+      for (let i = 0; i < 5; i++) {
+        await sleep(2000)
+        let retry = await window.getDoc(ref)
+        if (retry.exists()) {
+          ST[type].session = retry.data()
+          localStorage.setItem(cacheKey, JSON.stringify(ST[type].session))
+          removeWaitForPartner(type)
+          renderSession(type)
+          listenSession(type)
+          found = true
+          break
+        }
+      }
+      if (!found) {
+        // Still nothing — set up a persistent listener
+        listenForFirstSession(type)
+      }
+    }
+  } catch(e) {
+    console.error("loadSession error", e)
+    // Fallback to cache if available
+    if (cached) { ST[type].session = cached; renderSession(type) }
+    else elHide(px+"Loading")
+  }
 }
 
-function resetPhase(type) {
-  let prefix = type === "questions" ? "" : "s"
-  show(prefix + "AnswerPhase")
-  hide(prefix + "WaitingPhase")
-  let rev = document.getElementById(prefix + "RevealPhase")
-  if (rev) rev.classList.remove("visible")
+function buildNewSession(type) {
+  return {
+    date: getToday(),
+    questions: type === "questions" ? pickThreeQuestions() : pickThreeScenarios(),
+    answersA: ["","",""],
+    answersB: ["","",""],
+    revealed: false,
+    createdBy: user
+  }
 }
 
-/* ---- SUBMIT ---- */
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 
-function submitAnswer(type) {
-  let prefix = type === "questions" ? "" : "s"
-  let ta = document.getElementById(prefix + "MyAnswer")
-  let answer = ta.value.trim()
-  if (!answer) { alert("Please write your answer first!"); return }
+/* ---- Waiting for Person A to create the session ---- */
 
+function showWaitForPartner(type) {
+  let px = p(type)
+  let answering = document.getElementById(px+"Answering")
+  answering.style.display = "block"
+
+  if (!document.getElementById(px+"WaitPartner")) {
+    let div = document.createElement("div")
+    div.id = px + "WaitPartner"
+    div.className = "card"
+    div.innerHTML = `
+      <div class="waiting-box">
+        <div class="waiting-title">Waiting for ${nameA} to open the app 💌</div>
+        <div class="waiting-sub">Today's questions will appear once ${nameA} opens Hang Out<span class="waiting-dots"></span></div>
+      </div>`
+    answering.prepend(div)
+  }
+}
+
+function removeWaitForPartner(type) {
+  let el = document.getElementById(p(type)+"WaitPartner")
+  if (el) el.remove()
+}
+
+function listenForFirstSession(type) {
+  if (!window.db) return
+  let ref = window.doc(window.db, "hangout", sessionKey(type))
+  let cacheKey = "hangout_session_" + couple + "_" + type + "_" + getToday()
+  let unsub = window.onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
+      unsub()
+      ST[type].session = snap.data()
+      localStorage.setItem(cacheKey, JSON.stringify(ST[type].session))
+      removeWaitForPartner(type)
+      renderSession(type)
+      listenSession(type)
+    }
+  })
+}
+
+/* ================================================================
+   RENDER SESSION — populate the UI from session data
+================================================================ */
+
+function renderSession(type) {
+  let px = p(type)
+  let sess = ST[type].session
+  if (!sess) return
+
+  elHide(px+"Loading")
+
+  // If already revealed, go straight to reveal view
+  if (sess.revealed) {
+    renderReveal(type)
+    return
+  }
+
+  // Populate question texts
+  let dateEl = document.getElementById(px+"DateLabel")
+  if (dateEl) dateEl.innerText = fmtDate(sess.date)
+
+  sess.questions.forEach((q, i) => {
+    let text = typeof q === "string" ? q : q.text
+    let cat  = typeof q === "string" ? "relationship" : (q.cat || "relationship")
+    document.getElementById(px+"Text"+i).innerText = text
+    let badge = document.getElementById(px+"Cat"+i)
+    badge.className = "question-category " + (CAT_CLASSES[cat] || "cat-relationship")
+    badge.innerText = CAT_LABELS[cat] || cat
+  })
+
+  // Restore my locked answers
+  let myAnswers = user === "A" ? (sess.answersA || []) : (sess.answersB || [])
+  ST[type].lockedIdx = []
+  myAnswers.forEach((ans, i) => {
+    if (ans && ans.length > 0) {
+      let ta = document.getElementById(px+"Ans"+i)
+      ta.value = ans
+      ta.disabled = true
+      ta.classList.add("locked")
+      document.getElementById(px+"Badge"+i).style.display = "flex"
+      ST[type].lockedIdx.push(i)
+    }
+  })
+
+  // Set current index to first unlocked question
+  let firstUnlocked = [0,1,2].find(i => !ST[type].lockedIdx.includes(i))
+  ST[type].currentIdx = firstUnlocked !== undefined ? firstUnlocked : 0
+
+  elShow(px+"Answering")
+  renderQView(type)
+  updateChips(type)
+
+  // If I've already answered all 3, show waiting panel
+  if (ST[type].lockedIdx.length === 3) {
+    showWaitingPanel(type)
+  }
+}
+
+/* ================================================================
+   QUESTION VIEW — show correct block, update progress dots
+================================================================ */
+
+function renderQView(type) {
+  let px = p(type)
+  let idx    = ST[type].currentIdx
+  let locked = ST[type].lockedIdx
+
+  // Show only the current block
+  ;[0,1,2].forEach(i => {
+    document.getElementById(px+"Block"+i).style.display = i === idx ? "block" : "none"
+  })
+
+  // Progress dots
+  ;[0,1,2].forEach(i => {
+    let dot = document.getElementById(px+"Dot"+i)
+    dot.className = "progress-dot"
+    if (locked.includes(i)) dot.classList.add("answered")
+    else if (i === idx)     dot.classList.add("active")
+  })
+
+  let label = type === "questions" ? "Question" : "Scenario"
+  document.getElementById(px+"ProgressLabel").innerText = label + " " + (idx+1) + " of 3"
+
+  // Prev / Next
+  document.getElementById(px+"PrevBtn").disabled = idx === 0
+  document.getElementById(px+"NextBtn").disabled = idx === 2
+
+  // Lock button
+  let lockBtn = document.getElementById(px+"LockBtn")
+  if (locked.includes(idx)) {
+    lockBtn.disabled = true
+    lockBtn.innerText = "Locked ✓"
+  } else {
+    lockBtn.disabled = false
+    lockBtn.innerText = "Lock In ✓"
+  }
+}
+
+/* ================================================================
+   NAVIGATION (Prev / Next)
+================================================================ */
+
+function navigate(type, dir) {
+  let px  = p(type)
+  let idx = ST[type].currentIdx
+
+  // Save current textarea draft before navigating away
+  if (!ST[type].lockedIdx.includes(idx)) {
+    ST[type].drafts[idx] = document.getElementById(px+"Ans"+idx).value
+  }
+
+  ST[type].currentIdx = Math.max(0, Math.min(2, idx + dir))
+
+  // Restore draft for new index
+  let newIdx = ST[type].currentIdx
+  if (!ST[type].lockedIdx.includes(newIdx)) {
+    let ta = document.getElementById(px+"Ans"+newIdx)
+    if (ST[type].drafts[newIdx]) ta.value = ST[type].drafts[newIdx]
+  }
+
+  renderQView(type)
+}
+
+/* ================================================================
+   LOCK IN ANSWER
+================================================================ */
+
+async function lockCurrent(type) {
+  let px  = p(type)
+  let idx = ST[type].currentIdx
+  let ta  = document.getElementById(px+"Ans"+idx)
+  let ans = ta.value.trim()
+
+  if (!ans) { alert("Please write your answer before locking in."); return }
+
+  // Lock textarea visually
   ta.disabled = true
   ta.classList.add("locked")
-  document.getElementById(prefix + "SubmitBtn").disabled = true
+  document.getElementById(px+"Badge"+idx).style.display = "flex"
 
-  // Save answer
-  let field = "answer" + user
-  let docKey = couple + (type === "questions" ? "_q" : "_s")
-  if (window.db) {
-    let update = {}
-    update[field] = answer
-    window.updateDoc(window.doc(window.db, "hangout", docKey), update).catch(() => {
-      // Fallback to local
-      let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
-      local[field] = answer
-      localStorage.setItem("hangout_" + couple + "_" + type, JSON.stringify(local))
-    })
-  } else {
-    let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
-    local[field] = answer
-    localStorage.setItem("hangout_" + couple + "_" + type, JSON.stringify(local))
-  }
+  // Update local state
+  ST[type].lockedIdx.push(idx)
+  ST[type].drafts[idx] = ans
 
-  // Mark this user as answered
-  updateStatusPanels(type, user === "A", user === "B")
+  // Update session object
+  let field = user === "A" ? "answersA" : "answersB"
+  let updatedAnswers = [...(ST[type].session[field] || ["","",""])]
+  updatedAnswers[idx] = ans
+  ST[type].session[field] = updatedAnswers
 
-  hide(prefix + "AnswerPhase")
-  show(prefix + "WaitingPhase")
-}
-
-/* ---- REVEAL ---- */
-
-function revealAnswers(type) {
-  let prefix = type === "questions" ? "" : "s"
-  let docKey = couple + (type === "questions" ? "_q" : "_s")
-
-  let doReveal = (aAnswer, bAnswer) => {
-    document.getElementById(prefix + "RevealNameA").innerText = nameA
-    document.getElementById(prefix + "RevealNameB").innerText = nameB
-    document.getElementById(prefix + "RevealAnswerA").innerText = aAnswer || "(no answer)"
-    document.getElementById(prefix + "RevealAnswerB").innerText = bAnswer || "(no answer)"
-
-    hide(prefix + "WaitingPhase")
-    let rev = document.getElementById(prefix + "RevealPhase")
-    rev.classList.add("visible")
-
-    // Save to history
-    let q = type === "questions" ? currentQuestion.questions : currentQuestion.scenarios
-    if (q && aAnswer && bAnswer) {
-      history.unshift({
-        question: q.text,
-        cat: q.cat,
-        answerA: aAnswer,
-        answerB: bAnswer,
-        nameA, nameB,
-        time: Date.now()
-      })
-      if (history.length > 50) history = history.slice(0, 50)
-      localStorage.setItem("hangout_history_" + couple, JSON.stringify(history))
-    }
-  }
+  // Save to Firestore (merge so we never wipe the other person's answers)
+  let ref = window.doc(window.db, "hangout", sessionKey(type))
+  let update = {}
+  update[field] = updatedAnswers
 
   if (window.db) {
-    window.getDoc(window.doc(window.db, "hangout", docKey)).then(snap => {
-      let d = snap.data() || {}
-      doReveal(d.answerA, d.answerB)
-    }).catch(() => {
-      let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
-      doReveal(local.answerA, local.answerB)
+    await window.setDoc(ref, update, { merge: true }).catch(e => {
+      console.warn("lockCurrent save failed", e)
+      // Fallback: save to localStorage
+      localStorage.setItem(
+        "hangout_session_" + couple + "_" + type + "_" + getToday(),
+        JSON.stringify(ST[type].session)
+      )
     })
-  } else {
-    let local = JSON.parse(localStorage.getItem("hangout_" + couple + "_" + type) || "{}")
-    doReveal(local.answerA, local.answerB)
+  }
+
+  // Also update localStorage cache
+  localStorage.setItem(
+    "hangout_session_" + couple + "_" + type + "_" + getToday(),
+    JSON.stringify(ST[type].session)
+  )
+
+  renderQView(type)
+  updateChips(type)
+
+  // Auto-advance to next unlocked question
+  let nextUnlocked = [0,1,2].find(i => i > idx && !ST[type].lockedIdx.includes(i))
+  if (nextUnlocked !== undefined) {
+    ST[type].currentIdx = nextUnlocked
+    renderQView(type)
+    return
+  }
+
+  // All 3 locked — show waiting panel
+  if (ST[type].lockedIdx.length === 3) {
+    showWaitingPanel(type)
   }
 }
 
-/* ---- STATUS PANELS ---- */
+/* ================================================================
+   WAITING PANEL — after user has answered all 3
+================================================================ */
 
-function updateStatusPanels(type, aAnswered, bAnswered) {
-  let prefix = type === "questions" ? "" : "s"
-  let stA = document.getElementById(prefix + "StatusA")
-  let stB = document.getElementById(prefix + "StatusB")
-  if (!stA) return
+function showWaitingPanel(type) {
+  let px = p(type)
 
-  stA.querySelector(".status-icon").innerText = aAnswered ? "✅" : "⏳"
-  stB.querySelector(".status-icon").innerText = bAnswered ? "✅" : "⏳"
-  stA.classList.toggle("answered", aAnswered)
-  stB.classList.toggle("answered", bAnswered)
+  // Hide question blocks and nav
+  ;[0,1,2].forEach(i => elHide(px+"Block"+i))
+  elHide(px+"NavRow")
 
-  // Enable reveal if both answered
-  let revBtn = document.getElementById(prefix === "" ? "revealBtn" : "sRevealBtn")
-  if (revBtn) revBtn.disabled = !(aAnswered && bAnswered)
+  // Show waiting card
+  elShow(px+"WaitingCard")
+
+  // Check if partner is already done
+  checkRevealReady(type)
 }
 
-/* ---- FIREBASE LISTENER ---- */
+function checkRevealReady(type) {
+  let px   = p(type)
+  let sess = ST[type].session
+  if (!sess) return
 
-function listenFirebase() {
+  let answersA = sess.answersA || []
+  let answersB = sess.answersB || []
+  let aDone = answersA.filter(a => a && a.length > 0).length === 3
+  let bDone = answersB.filter(a => a && a.length > 0).length === 3
+
+  let btn = document.getElementById(px+"RevealBtn")
+  if (btn) btn.disabled = !(aDone && bDone)
+
+  if (sess.revealed) renderReveal(type)
+}
+
+/* ================================================================
+   FIREBASE LISTENER — real-time partner status updates
+================================================================ */
+
+function listenSession(type) {
   if (!window.db) return
+  let ref      = window.doc(window.db, "hangout", sessionKey(type))
+  let cacheKey = "hangout_session_" + couple + "_" + type + "_" + getToday()
 
-  let listenDoc = (docKey, type) => {
-    try {
-      window.onSnapshot(window.doc(window.db, "hangout", docKey), (snap) => {
-        let data = snap.data()
-        if (!data) return
-        let aAnswered = !!data.answerA
-        let bAnswered = !!data.answerB
-        updateStatusPanels(type, aAnswered, bAnswered)
+  try {
+    window.onSnapshot(ref, (snap) => {
+      if (!snap.exists()) return
+      let data = snap.data()
 
-        let prefix = type === "questions" ? "" : "s"
-        let revBtn = document.getElementById(prefix === "" ? "revealBtn" : "sRevealBtn")
-        if (revBtn) revBtn.disabled = !(aAnswered && bAnswered)
+      // Merge partner's answers into local session WITHOUT overwriting my own answers
+      // This prevents a race condition where the listener fires and wipes a mid-type answer
+      let myField      = user === "A" ? "answersA" : "answersB"
+      let partnerField = user === "A" ? "answersB" : "answersA"
 
-        // Update question if partner changed it
-        let myField = "answer" + user
-        let myLocked = document.getElementById(prefix + "MyAnswer")?.disabled
-        if (!myLocked && data.question) {
-          if (type === "questions") {
-            document.getElementById("questionText").innerText = data.question
-          } else {
-            document.getElementById("scenarioText").innerText = data.question
-          }
-        }
-      })
-    } catch(e) {}
-  }
+      if (ST[type].session) {
+        ST[type].session[partnerField] = data[partnerField] || ["","",""]
+        ST[type].session.revealed      = data.revealed || false
+      } else {
+        ST[type].session = data
+      }
 
-  listenDoc(couple + "_q", "questions")
-  listenDoc(couple + "_s", "scenarios")
+      localStorage.setItem(cacheKey, JSON.stringify(ST[type].session))
+
+      updateChips(type)
+      checkRevealReady(type)
+
+      if (data.revealed) renderReveal(type)
+    })
+  } catch(e) { console.warn("listenSession error", e) }
 }
 
-/* ---- HISTORY ---- */
+/* ================================================================
+   STATUS CHIPS
+================================================================ */
+
+function updateChips(type) {
+  let px   = p(type)
+  let sess = ST[type].session
+  if (!sess) return
+
+  let answersA = sess.answersA || []
+  let answersB = sess.answersB || []
+  let cntA = answersA.filter(a => a && a.length > 0).length
+  let cntB = answersB.filter(a => a && a.length > 0).length
+
+  document.getElementById(px+"ChipCountA").innerText = cntA+"/3"
+  document.getElementById(px+"ChipCountB").innerText = cntB+"/3"
+
+  let chipA = document.getElementById(px+"ChipA")
+  let chipB = document.getElementById(px+"ChipB")
+  chipA.querySelector(".chip-icon").innerText = cntA === 3 ? "✅" : "⏳"
+  chipB.querySelector(".chip-icon").innerText = cntB === 3 ? "✅" : "⏳"
+  chipA.classList.toggle("done", cntA === 3)
+  chipB.classList.toggle("done", cntB === 3)
+}
+
+/* ================================================================
+   REVEAL ALL
+================================================================ */
+
+async function doReveal(type) {
+  let sess = ST[type].session
+  if (!sess) return
+
+  // Write revealed:true to Firestore so partner's app updates too
+  if (window.db) {
+    await window.setDoc(
+      window.doc(window.db, "hangout", sessionKey(type)),
+      { revealed: true },
+      { merge: true }
+    ).catch(e => console.warn("reveal write failed", e))
+  }
+
+  sess.revealed = true
+  localStorage.setItem(
+    "hangout_session_" + couple + "_" + type + "_" + getToday(),
+    JSON.stringify(sess)
+  )
+
+  saveToHistory(type)
+  renderReveal(type)
+}
+
+function renderReveal(type) {
+  let px   = p(type)
+  let sess = ST[type].session
+  if (!sess) return
+
+  elHide(px+"Answering")
+  elHide(px+"Loading")
+
+  let dateEl = document.getElementById(px+"RevealDate")
+  if (dateEl) dateEl.innerText = fmtDate(sess.date)
+
+  let answersA = sess.answersA || []
+  let answersB = sess.answersB || []
+  let qLabel   = type === "questions" ? "Question" : "Scenario"
+
+  document.getElementById(px+"RevealContent").innerHTML =
+    (sess.questions || []).map((q, i) => {
+      let text = typeof q === "string" ? q : q.text
+      let cat  = typeof q === "string" ? "relationship" : (q.cat || "relationship")
+      return `
+        <div class="reveal-question-block" style="animation-delay:${i*0.12}s">
+          <div class="reveal-q-label">${qLabel} ${i+1}</div>
+          <span class="question-category ${CAT_CLASSES[cat]||'cat-relationship'}">${CAT_LABELS[cat]||''}</span>
+          <div class="reveal-question-text" style="margin-top:8px;">${text}</div>
+          <div class="reveal-answers">
+            <div class="reveal-card card-a">
+              <div class="reveal-name">${nameA}</div>
+              <div class="reveal-answer-text">${answersA[i] || "(no answer)"}</div>
+            </div>
+            <div class="reveal-card card-b">
+              <div class="reveal-name">${nameB}</div>
+              <div class="reveal-answer-text">${answersB[i] || "(no answer)"}</div>
+            </div>
+          </div>
+          ${i < 2 ? '<div class="reveal-divider"></div>' : ''}
+        </div>`
+    }).join("")
+
+  elShow(px+"Revealed")
+}
+
+/* ================================================================
+   HISTORY
+================================================================ */
+
+function saveToHistory(type) {
+  let sess = ST[type].session
+  if (!sess) return
+  let dupKey = sess.date + "_" + type
+  if (history.some(h => h.dupKey === dupKey)) return  // already saved
+
+  history.unshift({
+    dupKey, type,
+    date:     sess.date,
+    questions: sess.questions,
+    answersA:  sess.answersA || [],
+    answersB:  sess.answersB || [],
+    nameA, nameB
+  })
+
+  if (history.length > 60) history = history.slice(0, 60)
+  localStorage.setItem("hangout_history_"+couple, JSON.stringify(history))
+}
 
 function renderHistory() {
   let list = document.getElementById("historyList")
   if (!history.length) {
-    list.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">No revealed answers yet — complete some questions first!</div>`
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📖</div>No revealed answers yet — complete today's questions first!</div>`
     return
   }
-  list.innerHTML = history.map(item => `
-    <div class="history-item">
-      <div class="history-question">
-        <span class="question-category ${CAT_CLASSES[item.cat] || 'cat-relationship'}" style="margin-right:8px;">${CAT_LABELS[item.cat] || ''}</span>
-        ${item.question}
-      </div>
-      <div class="history-answers">
-        <div class="history-answer a-side">
-          <div class="h-name">${item.nameA}</div>
-          ${item.answerA}
-        </div>
-        <div class="history-answer b-side">
-          <div class="h-name">${item.nameB}</div>
-          ${item.answerB}
-        </div>
-      </div>
-    </div>
-  `).join("")
+
+  list.innerHTML = history.map(item => {
+    let typeLabel = item.type === "questions" ? "💬 Questions" : "🎲 Scenarios"
+    let answersA  = item.answersA || []
+    let answersB  = item.answersB || []
+    return `
+      <div class="history-item">
+        <div class="history-date">${typeLabel} · ${fmtDate(item.date)}</div>
+        ${(item.questions||[]).map((q,i) => {
+          let text = typeof q === "string" ? q : q.text
+          let cat  = typeof q === "string" ? "relationship" : (q.cat||"relationship")
+          return `
+            <div class="history-q-block">
+              <div class="history-q-text">
+                <span class="question-category ${CAT_CLASSES[cat]||'cat-relationship'}" style="flex-shrink:0;">${CAT_LABELS[cat]||''}</span>
+                ${text}
+              </div>
+              <div class="history-answers">
+                <div class="history-answer a-side">
+                  <div class="h-name">${item.nameA}</div>${answersA[i]||"(no answer)"}
+                </div>
+                <div class="history-answer b-side">
+                  <div class="h-name">${item.nameB}</div>${answersB[i]||"(no answer)"}
+                </div>
+              </div>
+            </div>
+            ${i < 2 ? '<div class="divider"></div>' : ''}`
+        }).join("")}
+      </div>`
+  }).join("")
 }
 
-/* ---- HELPERS ---- */
+/* ================================================================
+   TABS
+================================================================ */
 
-function show(id) { let el = document.getElementById(id); if(el) el.style.display = "block" }
-function hide(id) { let el = document.getElementById(id); if(el) el.style.display = "none" }
+function switchTab(tab) {
+  ;["questions","scenarios","history"].forEach(t => {
+    let id = "tab" + t.charAt(0).toUpperCase() + t.slice(1)
+    document.getElementById(id).classList.toggle("active", t === tab)
+    document.getElementById("tab-"+t).style.display = t === tab ? "block" : "none"
+  })
+  if (tab === "history") renderHistory()
+}
 
 </script>
 </body>

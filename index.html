@@ -416,24 +416,23 @@ input:focus { border-color: var(--rose-light); box-shadow: 0 0 0 3px rgba(232,82
 
 <!-- Setup Card -->
 <div class="card" id="setupCard">
-  <div class="section-label">Step 1 — Who are you?</div>
-  <div class="user-buttons">
-    <button id="btnA" onclick="setUser('A')">Person A</button>
-    <button id="btnB" onclick="setUser('B')">Person B</button>
+  <div class="section-label">Welcome 💌</div>
+  <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:18px; text-align:center;">
+    Enter your name and a shared couple code.<br>
+    Your partner uses the same code on their device.
+  </p>
+
+  <div class="inputs-row">
+    <input id="myName" placeholder="Your name" autocomplete="off">
+  </div>
+  <div class="inputs-row">
+    <input id="coupleCode" placeholder="Couple code (e.g. sunflower42)" autocomplete="off">
   </div>
 
-  <div id="nameStep" style="display:none;">
-    <div class="section-label" style="margin-top:16px;">Step 2 — Your name</div>
-    <div class="inputs-row">
-      <input id="myName" placeholder="Enter your name" autocomplete="off">
-    </div>
-    <div class="section-label" style="margin-top:10px;">Step 3 — Couple code</div>
-    <div class="inputs-row">
-      <input id="coupleCode" placeholder="Shared couple code (e.g. sunflower42)" autocomplete="off">
-    </div>
-    <div style="text-align:center; margin-top:10px;">
-      <button class="enter-btn" onclick="enterApp()">Enter ✨</button>
-    </div>
+  <div id="setupError" style="color:var(--rose); font-size:0.82rem; text-align:center; min-height:20px; margin-bottom:8px;"></div>
+
+  <div style="text-align:center;">
+    <button class="enter-btn" onclick="enterApp()">Let's Go ✨</button>
   </div>
 </div>
 
@@ -610,29 +609,91 @@ function setUser(u) {
   document.getElementById("myName").focus()
 }
 
-function enterApp() {
-  if (!user) { alert("Please select Person A or B first"); return }
+async function enterApp() {
   let myName = document.getElementById("myName").value.trim()
-  if (!myName) { alert("Please enter your name"); return }
-  couple = document.getElementById("coupleCode").value.trim() || "default"
+  let code = document.getElementById("coupleCode").value.trim()
+  let errBox = document.getElementById("setupError")
+  errBox.innerText = ""
 
-  document.getElementById("name" + user).value = myName
-  loadLocal()
-  // re-assert our name after load (loadLocal may overwrite from cache)
-  document.getElementById("name" + user).value = myName
+  if (!myName) { errBox.innerText = "Please enter your name."; return }
+  if (!code) { errBox.innerText = "Please enter a couple code."; return }
 
-  document.getElementById("setupCard").style.display = "none"
-  document.getElementById("mainApp").style.display = "block"
+  couple = code
+  document.getElementById("enter-btn") // disable to prevent double tap
+  document.querySelector(".enter-btn").disabled = true
+  document.querySelector(".enter-btn").innerText = "Connecting..."
 
-  // Init calendar to current month
-  let now = new Date()
-  calendarYear = now.getFullYear()
-  calendarMonth = now.getMonth()
+  try {
+    // Check Firestore for existing couple doc
+    let snap = await window.getDoc(window.doc(window.db, "couples", couple))
+    let data = snap.exists() ? snap.data() : {}
 
-  updateScoreDisplay()
-  loadCalendar()
-  listenFirebase()
-  saveSession()
+    if (!data.nameA) {
+      // First person to join — become Person A
+      user = "A"
+      await window.setDoc(window.doc(window.db, "couples", couple), {
+        nameA: myName,
+        scoreA: 0, scoreB: 0, activities: {}
+      }, { merge: true })
+
+    } else if (data.nameA === myName) {
+      // Returning Person A
+      user = "A"
+
+    } else if (!data.nameB) {
+      // Second person to join — become Person B
+      user = "B"
+      await window.updateDoc(window.doc(window.db, "couples", couple), {
+        nameB: myName
+      })
+
+    } else if (data.nameB === myName) {
+      // Returning Person B
+      user = "B"
+
+    } else {
+      // Couple is full and name doesn't match either
+      errBox.innerText = `This couple code is taken by ${data.nameA} & ${data.nameB}. Try a different code.`
+      document.querySelector(".enter-btn").disabled = false
+      document.querySelector(".enter-btn").innerText = "Let's Go ✨"
+      return
+    }
+
+    // Set names in hidden fields from Firestore data
+    let resolvedNameA = user === "A" ? myName : (data.nameA || "Person A")
+    let resolvedNameB = user === "B" ? myName : (data.nameB || "Person B")
+    document.getElementById("nameA").value = resolvedNameA
+    document.getElementById("nameB").value = resolvedNameB
+
+    // Load scores and activities
+    scoreA = data.scoreA || 0
+    scoreB = data.scoreB || 0
+    activities = data.activities || {}
+
+    // Save session locally for fast re-login
+    localStorage.setItem("rdTracker_lastSession", JSON.stringify({
+      user, couple,
+      nameA: resolvedNameA,
+      nameB: resolvedNameB
+    }))
+
+    document.getElementById("setupCard").style.display = "none"
+    document.getElementById("mainApp").style.display = "block"
+
+    let now = new Date()
+    calendarYear = now.getFullYear()
+    calendarMonth = now.getMonth()
+
+    updateScoreDisplay()
+    loadCalendar()
+    listenFirebase()
+
+  } catch(e) {
+    console.error(e)
+    errBox.innerText = "Connection failed. Check your internet and try again."
+    document.querySelector(".enter-btn").disabled = false
+    document.querySelector(".enter-btn").innerText = "Let's Go ✨"
+  }
 }
 
 function showSection(sec) {
@@ -819,19 +880,51 @@ function checkRewards() {
 
 /* ---------- init ---------- */
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   let saved = localStorage.getItem("rdTracker_lastSession")
-  if (saved) {
-    try {
-      let s = JSON.parse(saved)
-      if (s.nameA) document.getElementById("nameA").value = s.nameA
-      if (s.nameB) document.getElementById("nameB").value = s.nameB
-      if (s.coupleCode) document.getElementById("coupleCode").value = s.coupleCode
-      if (s.user) {
-        document.getElementById("myName").value = s.user === "A" ? s.nameA : s.nameB
-        setUser(s.user)
+  if (!saved) return
+
+  try {
+    let s = JSON.parse(saved)
+    if (!s.user || !s.coupleCode) return
+
+    // Pre-fill form in case they want to change anything
+    document.getElementById("myName").value = s.user === "A" ? s.nameA : s.nameB
+    document.getElementById("coupleCode").value = s.coupleCode
+
+    // Auto re-login — skip setup card
+    user = s.user
+    couple = s.coupleCode
+    document.getElementById("nameA").value = s.nameA || "Person A"
+    document.getElementById("nameB").value = s.nameB || "Person B"
+
+    // Freshen names from Firestore in background
+    if (window.db) {
+      let snap = await window.getDoc(window.doc(window.db, "couples", couple))
+      if (snap.exists()) {
+        let d = snap.data()
+        document.getElementById("nameA").value = d.nameA || s.nameA
+        document.getElementById("nameB").value = d.nameB || s.nameB
+        scoreA = d.scoreA || 0
+        scoreB = d.scoreB || 0
+        activities = d.activities || {}
       }
-    } catch(e) {}
+    }
+
+    document.getElementById("setupCard").style.display = "none"
+    document.getElementById("mainApp").style.display = "block"
+
+    let now = new Date()
+    calendarYear = now.getFullYear()
+    calendarMonth = now.getMonth()
+
+    updateScoreDisplay()
+    loadCalendar()
+    listenFirebase()
+
+  } catch(e) {
+    // Session corrupt — show setup fresh
+    localStorage.removeItem("rdTracker_lastSession")
   }
 })
 
