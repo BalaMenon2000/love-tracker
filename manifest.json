@@ -1,8 +1,8 @@
 {
   "name": "Relationship Tracker",
   "short_name": "LoveTracker",
-  "start_url": "/index.html",
-  "scope": "/",
+  "start_url": "/love-tracker/index.html",
+  "scope": "/love-tracker/",
   "display": "standalone",
   "background_color": "#fdf2f4",
   "theme_color": "#e8526a",
