@@ -449,6 +449,13 @@ input:focus { border-color: var(--rose-light); box-shadow: 0 0 0 3px rgba(232,82
     <div style="text-align:center; margin-top:6px;" id="onlineBadge"></div>
   </div>
 
+  <!-- Switch account -->
+  <div style="text-align:center; margin-top:10px;">
+    <button onclick="switchAccount()" style="background:none; border:1.5px solid var(--rose-mid); color:var(--text-muted); font-size:0.75rem; padding:6px 16px;">
+    Switch Account
+    </button>
+  </div>
+
   <!-- Navigation Hub -->
   <div class="nav-hub">
     <div class="nav-card" onclick="showSection('calendar')">
@@ -933,7 +940,10 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js').catch(() => {})
   })
 }
-
+function switchAccount() {
+  localStorage.removeItem("rdTracker_lastSession")
+  location.reload()
+}
 </script>
 </body>
 </html>
