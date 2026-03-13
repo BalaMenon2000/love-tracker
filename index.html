@@ -512,6 +512,7 @@ input:focus { border-color: var(--rose-light); box-shadow: 0 0 0 3px rgba(232,82
 
 <script>
 
+let firebaseListening = false
 let user = ""
 let couple = ""
 let selectedDate = null
@@ -585,12 +586,13 @@ function loadLocal() {
 async function saveFirebase() {
   if (!window.db) return
   try {
-    await window.setDoc(window.doc(window.db, "couples", couple), { scoreA, scoreB, activities })
+    await window.setDoc(window.doc(window.db, "couples", couple), { scoreA, scoreB, activities }, { merge: true })
   } catch(e) { console.warn("Firebase save failed", e) }
 }
 
 function listenFirebase() {
-  if (!window.db) return
+  if (!window.db || firebaseListening) return
+  firebaseListening = true
   try {
     window.onSnapshot(window.doc(window.db, "couples", couple), (snap) => {
       let data = snap.data()
@@ -606,7 +608,7 @@ function listenFirebase() {
 
 /* ---------- core ---------- */
 
-function setUser(u) {
+/*function setUser(u) {
   user = u
   document.getElementById("btnA").classList.remove("selected")
   document.getElementById("btnB").classList.remove("selected")
@@ -614,7 +616,7 @@ function setUser(u) {
   document.getElementById("nameStep").style.display = "block"
   document.getElementById("myName").placeholder = "Your name (" + (u === "A" ? "Person A" : "Person B") + ")"
   document.getElementById("myName").focus()
-}
+}*/
 
 async function enterApp() {
   let myName = document.getElementById("myName").value.trim()
@@ -886,8 +888,23 @@ function checkRewards() {
 }
 
 /* ---------- init ---------- */
-
-window.addEventListener("load", async () => {
+function waitForFirebase(callback) {
+  if (window.db) {
+    callback()
+  } else {
+    let attempts = 0
+    let interval = setInterval(() => {
+      attempts++
+      if (window.db) {
+        clearInterval(interval)
+        callback()
+      } else if (attempts > 20) {
+        clearInterval(interval) // give up after ~2 seconds
+      }
+    }, 100)
+  }
+}
+window.addEventListener("load", () => {
   let saved = localStorage.getItem("rdTracker_lastSession")
   if (!saved) return
 
@@ -895,42 +912,47 @@ window.addEventListener("load", async () => {
     let s = JSON.parse(saved)
     if (!s.user || !s.coupleCode) return
 
-    // Pre-fill form in case they want to change anything
+    // Pre-fill form fields
     document.getElementById("myName").value = s.user === "A" ? s.nameA : s.nameB
     document.getElementById("coupleCode").value = s.coupleCode
 
-    // Auto re-login — skip setup card
-    user = s.user
+    user   = s.user
     couple = s.coupleCode
     document.getElementById("nameA").value = s.nameA || "Person A"
     document.getElementById("nameB").value = s.nameB || "Person B"
 
-    // Freshen names from Firestore in background
-    if (window.db) {
-      let snap = await window.getDoc(window.doc(window.db, "couples", couple))
-      if (snap.exists()) {
-        let d = snap.data()
-        document.getElementById("nameA").value = d.nameA || s.nameA
-        document.getElementById("nameB").value = d.nameB || s.nameB
-        scoreA = d.scoreA || 0
-        scoreB = d.scoreB || 0
-        activities = d.activities || {}
-      }
-    }
+    loadLocal()
 
+    // Show app immediately with cached data
     document.getElementById("setupCard").style.display = "none"
-    document.getElementById("mainApp").style.display = "block"
+    document.getElementById("mainApp").style.display  = "block"
 
     let now = new Date()
-    calendarYear = now.getFullYear()
+    calendarYear  = now.getFullYear()
     calendarMonth = now.getMonth()
 
     updateScoreDisplay()
     loadCalendar()
-    listenFirebase()
+
+    // Wait for Firebase to be ready, then freshen data
+    waitForFirebase(() => {
+      window.getDoc(window.doc(window.db, "couples", couple))
+        .then(snap => {
+          if (!snap.exists()) return
+          let d = snap.data()
+          document.getElementById("nameA").value = d.nameA || s.nameA
+          document.getElementById("nameB").value = d.nameB || s.nameB
+          scoreA     = d.scoreA     || 0
+          scoreB     = d.scoreB     || 0
+          activities = d.activities || {}
+          updateScoreDisplay()
+          loadCalendar()
+          listenFirebase()
+        })
+        .catch(e => console.error("Firestore freshen failed", e))
+    })
 
   } catch(e) {
-    // Session corrupt — show setup fresh
     localStorage.removeItem("rdTracker_lastSession")
   }
 })
